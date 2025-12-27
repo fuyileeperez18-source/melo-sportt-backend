@@ -1,7 +1,7 @@
 {
-  "name": "walmer-backend",
+  "name": "melo-sportt-backend",
   "version": "1.0.0",
-  "description": "Backend API for Walmer Store",
+  "description": "Backend API for MELO SPORTT",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
