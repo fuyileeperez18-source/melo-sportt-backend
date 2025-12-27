@@ -1,15 +1,113 @@
 import { Request } from 'express';
 
 // User Types
+export type UserRole = 'customer' | 'admin' | 'super_admin' | 'developer';
+export type UserGender = 'masculino' | 'femenino' | 'otro' | 'prefiero_no_decir';
+export type DocumentType = 'cc' | 'ce' | 'passport' | 'nit';
+
 export interface User {
   id: string;
   email: string;
   full_name: string;
   phone?: string;
   avatar_url?: string;
-  role: 'customer' | 'admin' | 'super_admin';
+  role: UserRole;
+  // Extended profile fields
+  bio?: string;
+  birth_date?: string;
+  document_type?: DocumentType;
+  document_number?: string;
+  preferred_size?: string;
+  preferred_shoe_size?: string;
+  gender?: UserGender;
+  instagram_handle?: string;
+  is_active: boolean;
+  last_login?: string;
+  preferences?: UserPreferences;
   created_at: string;
   updated_at: string;
+}
+
+export interface UserPreferences {
+  notifications_email?: boolean;
+  notifications_sms?: boolean;
+  notifications_push?: boolean;
+  newsletter?: boolean;
+  language?: string;
+  currency?: string;
+}
+
+// Team member (for store staff like owner, developer, etc.)
+export interface TeamMember {
+  id: string;
+  user_id: string;
+  user?: User;
+  position: string; // 'owner', 'developer', 'manager', etc
+  commission_percentage: number;
+  can_manage_products: boolean;
+  can_manage_orders: boolean;
+  can_view_analytics: boolean;
+  can_manage_customers: boolean;
+  can_manage_settings: boolean;
+  can_manage_team: boolean;
+  notes?: string;
+  joined_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Commission tracking
+export type CommissionStatus = 'pending' | 'approved' | 'paid' | 'cancelled';
+
+export interface Commission {
+  id: string;
+  team_member_id: string;
+  team_member?: TeamMember;
+  order_id?: string;
+  order?: Order;
+  order_total: number;
+  commission_percentage: number;
+  commission_amount: number;
+  status: CommissionStatus;
+  paid_at?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CommissionPayment {
+  id: string;
+  team_member_id: string;
+  team_member?: TeamMember;
+  amount: number;
+  payment_method?: string;
+  reference_number?: string;
+  notes?: string;
+  paid_by?: string;
+  created_at: string;
+}
+
+export interface CommissionSummary {
+  total_earned: number;
+  total_pending: number;
+  total_paid: number;
+  this_month_earned: number;
+  last_month_earned: number;
+  orders_count: number;
+}
+
+// User notifications
+export type NotificationType = 'order' | 'commission' | 'promotion' | 'system';
+
+export interface UserNotification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  message?: string;
+  data?: Record<string, unknown>;
+  is_read: boolean;
+  created_at: string;
 }
 
 export interface Address {

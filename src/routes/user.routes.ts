@@ -1,10 +1,33 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { userService } from '../services/user.service.js';
-import { authenticate, requireAdmin } from '../middleware/auth.js';
+import { authenticate, requireAdmin, requireSuperAdmin } from '../middleware/auth.js';
 import type { AuthRequest } from '../types/index.js';
 
 const router = Router();
+
+// Profile update schema with all new fields
+const profileUpdateSchema = z.object({
+  full_name: z.string().min(2).optional(),
+  phone: z.string().optional().nullable(),
+  avatar_url: z.string().url().optional().nullable(),
+  bio: z.string().max(500).optional().nullable(),
+  birth_date: z.string().optional().nullable(),
+  document_type: z.enum(['cc', 'ce', 'passport', 'nit']).optional().nullable(),
+  document_number: z.string().optional().nullable(),
+  preferred_size: z.string().optional().nullable(),
+  preferred_shoe_size: z.string().optional().nullable(),
+  gender: z.enum(['masculino', 'femenino', 'otro', 'prefiero_no_decir']).optional().nullable(),
+  instagram_handle: z.string().optional().nullable(),
+  preferences: z.object({
+    notifications_email: z.boolean().optional(),
+    notifications_sms: z.boolean().optional(),
+    notifications_push: z.boolean().optional(),
+    newsletter: z.boolean().optional(),
+    language: z.string().optional(),
+    currency: z.string().optional(),
+  }).optional(),
+});
 
 // Get current user profile
 router.get('/profile', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -19,12 +42,7 @@ router.get('/profile', authenticate, async (req: AuthRequest, res: Response, nex
 // Update current user profile
 router.put('/profile', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const data = z.object({
-      full_name: z.string().min(2).optional(),
-      phone: z.string().optional(),
-      avatar_url: z.string().url().optional(),
-    }).parse(req.body);
-
+    const data = profileUpdateSchema.parse(req.body);
     const profile = await userService.updateProfile(req.user!.id, data);
     res.json({ success: true, data: profile });
   } catch (error) {
@@ -99,6 +117,171 @@ router.get('/:id', authenticate, requireAdmin, async (req: Request, res: Respons
   try {
     const profile = await userService.getProfile(req.params.id);
     res.json({ success: true, data: profile });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ==================== TEAM MEMBER ROUTES ====================
+
+// Get current user's team member info (if they are a team member)
+router.get('/team/me', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const teamMember = await userService.getTeamMember(req.user!.id);
+    res.json({ success: true, data: teamMember });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get all team members (Admin only)
+router.get('/team/all', authenticate, requireAdmin, async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const teamMembers = await userService.getAllTeamMembers();
+    res.json({ success: true, data: teamMembers });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Create team member (Super Admin only - owner can add team members)
+router.post('/team', authenticate, requireSuperAdmin, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const data = z.object({
+      user_id: z.string().uuid(),
+      position: z.string().min(1),
+      commission_percentage: z.number().min(0).max(100).default(0),
+      can_manage_products: z.boolean().default(false),
+      can_manage_orders: z.boolean().default(false),
+      can_view_analytics: z.boolean().default(false),
+      can_manage_customers: z.boolean().default(false),
+      can_manage_settings: z.boolean().default(false),
+      can_manage_team: z.boolean().default(false),
+      notes: z.string().optional(),
+    }).parse(req.body);
+
+    const teamMember = await userService.createTeamMember(data);
+    res.status(201).json({ success: true, data: teamMember });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update team member (Super Admin only)
+router.put('/team/:userId', authenticate, requireSuperAdmin, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = z.object({
+      position: z.string().min(1).optional(),
+      commission_percentage: z.number().min(0).max(100).optional(),
+      can_manage_products: z.boolean().optional(),
+      can_manage_orders: z.boolean().optional(),
+      can_view_analytics: z.boolean().optional(),
+      can_manage_customers: z.boolean().optional(),
+      can_manage_settings: z.boolean().optional(),
+      can_manage_team: z.boolean().optional(),
+      notes: z.string().optional(),
+    }).parse(req.body);
+
+    const teamMember = await userService.updateTeamMember(req.params.userId, data);
+    res.json({ success: true, data: teamMember });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ==================== COMMISSION ROUTES ====================
+
+// Get my commissions (for team members with commission)
+router.get('/commissions/me', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const teamMember = await userService.getTeamMember(req.user!.id);
+    if (!teamMember) {
+      return res.status(403).json({ success: false, error: 'No eres miembro del equipo' });
+    }
+
+    const filters = {
+      status: req.query.status as string,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 50,
+      offset: req.query.offset ? parseInt(req.query.offset as string) : 0,
+    };
+
+    const result = await userService.getCommissions(teamMember.id, filters);
+    res.json({ success: true, data: result.data, count: result.count });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get my commission summary
+router.get('/commissions/summary', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const teamMember = await userService.getTeamMember(req.user!.id);
+    if (!teamMember) {
+      return res.status(403).json({ success: false, error: 'No eres miembro del equipo' });
+    }
+
+    const summary = await userService.getCommissionSummary(teamMember.id);
+    res.json({ success: true, data: summary });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update commission status (Super Admin only - owner pays commissions)
+router.put('/commissions/:id/status', authenticate, requireSuperAdmin, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { status } = z.object({
+      status: z.enum(['pending', 'approved', 'paid', 'cancelled']),
+    }).parse(req.body);
+
+    const commission = await userService.updateCommissionStatus(req.params.id, status, req.user!.id);
+    res.json({ success: true, data: commission });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ==================== NOTIFICATION ROUTES ====================
+
+// Get my notifications
+router.get('/notifications', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+    const notifications = await userService.getNotifications(req.user!.id, limit);
+    const unreadCount = await userService.getUnreadNotificationCount(req.user!.id);
+    res.json({ success: true, data: notifications, unread_count: unreadCount });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Mark notification as read
+router.put('/notifications/:id/read', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    await userService.markNotificationAsRead(req.params.id, req.user!.id);
+    res.json({ success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Mark all notifications as read
+router.put('/notifications/read-all', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    await userService.markAllNotificationsAsRead(req.user!.id);
+    res.json({ success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ==================== OWNER DASHBOARD ====================
+
+// Get owner dashboard stats (Super Admin only)
+router.get('/dashboard/owner', authenticate, requireSuperAdmin, async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const stats = await userService.getOwnerDashboardStats();
+    res.json({ success: true, data: stats });
   } catch (error) {
     next(error);
   }
