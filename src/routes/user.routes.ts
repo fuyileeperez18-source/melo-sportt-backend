@@ -43,7 +43,11 @@ router.get('/profile', authenticate, async (req: AuthRequest, res: Response, nex
 router.put('/profile', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const data = profileUpdateSchema.parse(req.body);
-    const profile = await userService.updateProfile(req.user!.id, data);
+    // Convert null values to undefined for the service
+    const cleanData = Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [key, value === null ? undefined : value])
+    );
+    const profile = await userService.updateProfile(req.user!.id, cleanData);
     res.json({ success: true, data: profile });
   } catch (error) {
     next(error);
