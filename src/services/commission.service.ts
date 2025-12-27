@@ -91,7 +91,7 @@ export const commissionService = {
       ORDER BY date DESC`
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: { date: string; sales: string; orders: string }) => ({
       date: row.date,
       sales: parseFloat(row.sales) || 0,
       commission: (parseFloat(row.sales) || 0) * COMMISSION_RATE,
@@ -121,7 +121,7 @@ export const commissionService = {
       [limit, offset]
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: { order_id: string; order_number: string; total: string; customer_name: string; customer_email: string; status: string; payment_status: string; created_at: string }) => ({
       ...row,
       total: parseFloat(row.total),
       commission: parseFloat(row.total) * COMMISSION_RATE,
@@ -144,7 +144,7 @@ export const commissionService = {
       ORDER BY month DESC`
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: { month: string; sales: string; orders: string }) => ({
       month: row.month,
       sales: parseFloat(row.sales) || 0,
       commission: (parseFloat(row.sales) || 0) * COMMISSION_RATE,

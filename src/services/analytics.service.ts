@@ -70,7 +70,7 @@ export const analyticsService = {
       [startDate, endDate]
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: { date: string; revenue: string }) => ({
       date: row.date,
       revenue: parseFloat(row.revenue) || 0,
     }));
@@ -96,7 +96,7 @@ export const analyticsService = {
       `SELECT status, COUNT(*) as count FROM orders GROUP BY status`
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: { status: string; count: string }) => ({
       status: row.status,
       count: parseInt(row.count),
     }));
