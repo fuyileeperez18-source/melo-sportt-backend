@@ -12,6 +12,7 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   FRONTEND_URL: z.string().default('http://localhost:5173'),
+  ALLOWED_ORIGINS: z.string().optional(),
   RATE_LIMIT_WINDOW_MS: z.string().default('900000'),
   RATE_LIMIT_MAX: z.string().default('100'),
   // Cloudinary
