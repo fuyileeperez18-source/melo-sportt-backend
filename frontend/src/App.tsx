@@ -17,6 +17,7 @@ import { CartPage } from '@/pages/CartPage';
 import { CheckoutPage } from '@/pages/CheckoutPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
+import { AdminLoginPage } from '@/pages/auth/AdminLoginPage';
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
 import { AdminOrders } from '@/pages/admin/AdminOrders';
 import { AdminProducts } from '@/pages/admin/AdminProducts';
@@ -140,6 +141,7 @@ function App() {
           <Route element={<SimpleLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/admin-login" element={<AdminLoginPage />} />
             <Route path="/forgot-password" element={<div className="min-h-screen bg-black py-20 text-center text-white">Forgot Password</div>} />
           </Route>
 

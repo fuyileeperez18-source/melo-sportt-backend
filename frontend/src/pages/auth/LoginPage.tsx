@@ -37,37 +37,17 @@ export function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      console.log('🔐 [LoginPage] Iniciando login para:', data.email);
-
-      // signIn devuelve el usuario directamente después de actualizar el estado
       const user = await signIn(data.email, data.password);
 
-      console.log('🔐 [LoginPage] Login exitoso - Usuario devuelto:', user);
-      console.log('🔐 [LoginPage] Role del usuario:', user?.role);
-      console.log('🔐 [LoginPage] Full user object:', JSON.stringify(user, null, 2));
+      toast.success(`¡Bienvenido ${user?.full_name || user?.email}!`);
 
-      // Verificar el estado inmediatamente
-      const currentState = useAuthStore.getState();
-      console.log('🔐 [LoginPage] Estado actual:');
-      console.log('   - isAuthenticated:', currentState.isAuthenticated);
-      console.log('   - user:', currentState.user);
-      console.log('   - profile:', currentState.profile);
-      console.log('   - user.role:', currentState.user?.role);
-      console.log('   - profile.role:', currentState.profile?.role);
-
-      // Si es admin o super_admin, redirigir al panel de admin
-      // REDIRECCIÓN INMEDIATA como en tutorías
+      // Redirect based on user role (EXACTLY like tutorías Login.tsx lines 79-84)
       if (user?.role === 'admin' || user?.role === 'super_admin') {
-        console.log('🚀 [LoginPage] Usuario ES ADMIN - Redirigiendo a /admin');
-        toast.success(`¡Bienvenido al Panel de Administración, ${user.full_name || user.email}!`);
         navigate('/admin', { replace: true });
       } else {
-        console.log('👤 [LoginPage] Usuario regular, redirigiendo a:', from);
-        toast.success('¡Bienvenido de nuevo!');
         navigate(from, { replace: true });
       }
     } catch (error) {
-      console.error('❌ [LoginPage] Error en login:', error);
       toast.error('Correo o contraseña inválidos');
     }
   };
