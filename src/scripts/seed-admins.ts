@@ -6,6 +6,7 @@ import { query, pool } from '../config/database.js';
  * Script para crear las cuentas de administrador
  * - Fuyi (super_admin): Programador con acceso total y comisiones del 12%
  * - Walmer (admin): Dueño del local, puede gestionar productos y pedidos
+ * - Admin Test (admin): Usuario de prueba para verificar panel admin
  */
 
 async function seedAdmins() {
@@ -25,6 +26,13 @@ async function seedAdmins() {
       fullName: 'Walmer Admin',
       role: 'admin',
       description: 'Dueño del local - Gestión de productos y pedidos',
+    },
+    {
+      email: 'admin@melosportt.com',
+      password: 'Admin123!*',
+      fullName: 'Admin Test',
+      role: 'admin',
+      description: 'Usuario admin de prueba - Panel completo',
     },
   ];
 
@@ -178,6 +186,8 @@ async function seedAdmins() {
   console.log('\n📋 Resumen de roles:');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('SUPER_ADMIN (Fuyi):');
+  console.log('  • Email: fuyi@melosportt.com');
+  console.log('  • Password: Fuyi123!*');
   console.log('  • Acceso total al sistema');
   console.log('  • Ver todas las ventas y comisiones (12%)');
   console.log('  • Gestionar usuarios y administradores');
@@ -185,10 +195,18 @@ async function seedAdmins() {
   console.log('  • Analytics y reportes completos');
   console.log('');
   console.log('ADMIN (Walmer):');
+  console.log('  • Email: walmer@melosportt.com');
+  console.log('  • Password: Walmer123!*');
   console.log('  • Gestionar productos (crear, editar, eliminar)');
   console.log('  • Ver y gestionar pedidos');
   console.log('  • Gestionar inventario');
   console.log('  • Ver analytics básicos de ventas');
+  console.log('');
+  console.log('ADMIN (Test User):');
+  console.log('  • Email: admin@melosportt.com');
+  console.log('  • Password: Admin123!*');
+  console.log('  • Usuario de prueba para verificar panel admin');
+  console.log('  • Mismos permisos que Walmer');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   await pool.end();
