@@ -246,9 +246,19 @@ export const commissionService = {
       order: row.order_id ? {
         id: row.order_id,
         order_number: row.order_number,
+        user_id: '', // Required by Order type
+        subtotal: 0, // Required by Order type
+        discount: 0, // Required by Order type
+        shipping_cost: 0, // Required by Order type
+        tax: 0, // Required by Order type
         total: parseFloat(row.order_total),
-        status: row.order_status,
+        status: row.order_status as any,
+        payment_status: 'paid', // Required by Order type
+        payment_method: '', // Required by Order type
+        shipping_address: {} as any, // Required by Order type
+        billing_address: {} as any, // Required by Order type
         created_at: row.order_created_at,
+        updated_at: row.order_created_at,
       } : undefined,
       order_total: parseFloat(row.order_total),
       commission_percentage: parseFloat(row.commission_percentage),
