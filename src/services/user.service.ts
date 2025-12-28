@@ -82,6 +82,21 @@ export const userService = {
     return result.rows[0] as User;
   },
 
+  async updateUserRole(userId: string, role: string): Promise<User> {
+    const result = await query(
+      `UPDATE users SET role = $1, updated_at = NOW()
+       WHERE id = $2
+       RETURNING ${USER_SELECT_FIELDS.replace(/u\./g, '')}`,
+      [role, userId]
+    );
+
+    if (result.rows.length === 0) {
+      throw new AppError('User not found', 404);
+    }
+
+    return result.rows[0] as User;
+  },
+
   async getAll(filters?: UserFilters): Promise<{ data: User[]; count: number }> {
     let sql = `
       SELECT id, email, full_name, phone, avatar_url, role, created_at, updated_at

@@ -126,6 +126,20 @@ router.get('/:id', authenticate, requireAdmin, async (req: Request, res: Respons
   }
 });
 
+// Update user role (Super Admin only)
+router.put('/:id/role', authenticate, requireSuperAdmin, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { role } = z.object({
+      role: z.enum(['customer', 'admin', 'super_admin']),
+    }).parse(req.body);
+
+    const updatedUser = await userService.updateUserRole(req.params.id, role);
+    res.json({ success: true, data: updatedUser });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // ==================== TEAM MEMBER ROUTES ====================
 
 // Get current user's team member info (if they are a team member)
