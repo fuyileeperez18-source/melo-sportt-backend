@@ -47,25 +47,35 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const response = await authService.signIn(email, password);
-          console.log('🔐 SignIn - Response completa:', response);
-          console.log('🔐 SignIn - User received:', response.user);
-          console.log('🔐 SignIn - User role:', response.user?.role);
-          console.log('🔐 SignIn - Token:', response.token);
+          console.log('🔐 [authStore.signIn] Response completa:', response);
+          console.log('🔐 [authStore.signIn] User received:', response.user);
+          console.log('🔐 [authStore.signIn] User role:', response.user?.role);
+          console.log('🔐 [authStore.signIn] Token:', response.token ? 'Present' : 'Missing');
+
+          if (!response.user || !response.user.role) {
+            console.error('❌ [authStore.signIn] PROBLEMA: Usuario sin role!', response);
+            throw new Error('Usuario sin role en la respuesta');
+          }
 
           // IMPORTANTE: Guardar user Y profile con el role
           set({
             user: response.user,
             profile: response.user,
-            isAuthenticated: true
+            isAuthenticated: true,
+            isLoading: false  // Importante: actualizar isLoading aquí
           });
 
-          console.log('✅ Estado actualizado - User:', get().user);
-          console.log('✅ Estado actualizado - Profile:', get().profile);
-          console.log('✅ Estado actualizado - isAuthenticated:', get().isAuthenticated);
+          console.log('✅ [authStore.signIn] Estado actualizado:');
+          console.log('   - User:', get().user);
+          console.log('   - Profile:', get().profile);
+          console.log('   - Role:', get().profile?.role);
+          console.log('   - isAuthenticated:', get().isAuthenticated);
 
           return response.user; // Devolver el user para que LoginPage lo use
-        } finally {
+        } catch (error) {
+          console.error('❌ [authStore.signIn] Error:', error);
           set({ isLoading: false });
+          throw error;
         }
       },
 
