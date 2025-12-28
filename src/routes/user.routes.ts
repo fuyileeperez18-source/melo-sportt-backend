@@ -39,6 +39,31 @@ router.get('/profile', authenticate, async (req: AuthRequest, res: Response, nex
   }
 });
 
+// Debug endpoint to check user role and permissions
+router.get('/debug', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const profile = await userService.getProfile(req.user!.id);
+    const teamMember = await userService.getTeamMember(req.user!.id);
+
+    res.json({
+      success: true,
+      data: {
+        user_id: req.user!.id,
+        email: req.user!.email,
+        role: req.user!.role,
+        full_profile: profile,
+        team_member: teamMember,
+        is_admin: req.user!.role === 'admin' || req.user!.role === 'super_admin',
+        is_super_admin: req.user!.role === 'super_admin',
+        has_team_member_record: !!teamMember,
+        commission_percentage: teamMember?.commission_percentage || 0,
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Update current user profile
 router.put('/profile', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
