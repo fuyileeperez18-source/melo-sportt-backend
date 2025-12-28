@@ -39,37 +39,32 @@ export function LoginPage() {
     try {
       console.log('🔐 [LoginPage] Iniciando login para:', data.email);
 
-      // signIn ahora devuelve el usuario directamente
+      // signIn devuelve el usuario directamente después de actualizar el estado
       const user = await signIn(data.email, data.password);
 
       console.log('🔐 [LoginPage] Login exitoso - Usuario devuelto:', user);
       console.log('🔐 [LoginPage] Role del usuario:', user?.role);
+      console.log('🔐 [LoginPage] Full user object:', JSON.stringify(user, null, 2));
 
-      // IMPORTANTE: Esperar a que el estado se actualice completamente
-      // Dar un pequeño delay para asegurar que zustand persiste el estado
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Verificar que el estado se actualizó correctamente
-      const currentUser = useAuthStore.getState().user;
-      console.log('🔐 [LoginPage] Estado actual después de login:', currentUser);
-      console.log('🔐 [LoginPage] isAuthenticated:', useAuthStore.getState().isAuthenticated);
+      // Verificar el estado inmediatamente
+      const currentState = useAuthStore.getState();
+      console.log('🔐 [LoginPage] Estado actual:');
+      console.log('   - isAuthenticated:', currentState.isAuthenticated);
+      console.log('   - user:', currentState.user);
+      console.log('   - profile:', currentState.profile);
+      console.log('   - user.role:', currentState.user?.role);
+      console.log('   - profile.role:', currentState.profile?.role);
 
       // Si es admin o super_admin, redirigir al panel de admin
+      // REDIRECCIÓN INMEDIATA como en tutorías
       if (user?.role === 'admin' || user?.role === 'super_admin') {
-        console.log('🚀 [LoginPage] Usuario es admin, redirigiendo a /admin');
+        console.log('🚀 [LoginPage] Usuario ES ADMIN - Redirigiendo a /admin');
         toast.success(`¡Bienvenido al Panel de Administración, ${user.full_name || user.email}!`);
-
-        // Usar setTimeout para asegurar que la navegación ocurre después del toast
-        setTimeout(() => {
-          navigate('/admin', { replace: true });
-        }, 200);
+        navigate('/admin', { replace: true });
       } else {
         console.log('👤 [LoginPage] Usuario regular, redirigiendo a:', from);
         toast.success('¡Bienvenido de nuevo!');
-
-        setTimeout(() => {
-          navigate(from, { replace: true });
-        }, 200);
+        navigate(from, { replace: true });
       }
     } catch (error) {
       console.error('❌ [LoginPage] Error en login:', error);

@@ -40,6 +40,8 @@ router.post('/signin', async (req: Request, res: Response, next: NextFunction) =
     const result = await authService.signIn(email, password);
     console.log('✅ [POST /api/auth/signin] SignIn successful for:', email);
     console.log('✅ User role:', result.user.role);
+    console.log('✅ Result completo:', JSON.stringify(result, null, 2));
+    console.log('✅ Result.user completo:', JSON.stringify(result.user, null, 2));
 
     res.json({ success: true, data: result });
   } catch (error) {
