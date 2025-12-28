@@ -19,36 +19,40 @@ interface ProductFilters {
 
 export const productService = {
   async getAll(filters?: ProductFilters): Promise<Product[]> {
-    let sql = `
-      SELECT p.*,
-        json_build_object(
-          'id', c.id,
-          'name', c.name,
-          'slug', c.slug
-        ) as category,
-        COALESCE(
-          (SELECT json_agg(pi ORDER BY pi.position)
-           FROM product_images pi
-           WHERE pi.product_id = p.id), '[]'
-        ) as images,
-        COALESCE(
-          (SELECT json_agg(pv)
-           FROM product_variants pv
-           WHERE pv.product_id = p.id AND pv.is_active = true), '[]'
-        ) as variants
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.is_active = true
-    `;
+    try {
+      console.log('🔍 [PRODUCT SERVICE] getAll called with filters:', JSON.stringify(filters));
 
-    const params: unknown[] = [];
-    let paramIndex = 1;
+      let sql = `
+        SELECT p.*,
+          json_build_object(
+            'id', c.id,
+            'name', c.name,
+            'slug', c.slug
+          ) as category,
+          COALESCE(
+            (SELECT json_agg(pi ORDER BY pi.position)
+             FROM product_images pi
+             WHERE pi.product_id = p.id), '[]'
+          ) as images,
+          COALESCE(
+            (SELECT json_agg(pv)
+             FROM product_variants pv
+             WHERE pv.product_id = p.id AND pv.is_active = true), '[]'
+          ) as variants
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE p.is_active = true
+      `;
 
-    if (filters?.category) {
-      sql += ` AND p.category_id = $${paramIndex}`;
-      params.push(filters.category);
-      paramIndex++;
-    }
+      const params: unknown[] = [];
+      let paramIndex = 1;
+
+      if (filters?.category) {
+        console.log('🔍 [PRODUCT SERVICE] Filtering by category:', filters.category);
+        sql += ` AND p.category_id = $${paramIndex}`;
+        params.push(filters.category);
+        paramIndex++;
+      }
 
     if (filters?.search) {
       sql += ` AND (p.name ILIKE $${paramIndex} OR p.description ILIKE $${paramIndex} OR p.brand ILIKE $${paramIndex})`;
@@ -133,8 +137,15 @@ export const productService = {
       params.push(filters.offset);
     }
 
-    const result = await query(sql, params);
-    return result.rows as Product[];
+      console.log('🔍 [PRODUCT SERVICE] Executing SQL with', params.length, 'params');
+      const result = await query(sql, params);
+      console.log('✅ [PRODUCT SERVICE] Query successful, found', result.rows.length, 'products');
+      return result.rows as Product[];
+    } catch (error: any) {
+      console.error('❌ [PRODUCT SERVICE] Error in getAll:', error.message);
+      console.error('❌ [PRODUCT SERVICE] Stack:', error.stack);
+      throw new AppError(`Error fetching products: ${error.message}`, 500);
+    }
   },
 
   // Get all products for admin (includes inactive)

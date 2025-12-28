@@ -10,6 +10,7 @@ const router = Router();
 // Get all products
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    console.log('📦 [PRODUCTS] GET / - Query params:', req.query);
     const filters = {
       category: req.query.category as string,
       search: req.query.search as string,
@@ -18,9 +19,12 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
       limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
       offset: req.query.offset ? parseInt(req.query.offset as string) : undefined,
     };
+    console.log('📦 [PRODUCTS] Filters:', filters);
     const products = await productService.getAll(filters);
+    console.log('📦 [PRODUCTS] Found products:', products.length);
     res.json({ success: true, data: products });
   } catch (error) {
+    console.error('❌ [PRODUCTS] Error in GET /:', error);
     next(error);
   }
 });
