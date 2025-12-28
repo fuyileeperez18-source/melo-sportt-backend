@@ -37,17 +37,27 @@ export function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
+      console.log('🔐 [LoginPage] Iniciando login...');
       const user = await signIn(data.email, data.password);
+
+      console.log('🔐 [LoginPage] Usuario recibido:', user);
+      console.log('🔐 [LoginPage] user?.role:', user?.role);
+      console.log('🔐 [LoginPage] typeof user?.role:', typeof user?.role);
+      console.log('🔐 [LoginPage] user?.role === "admin":', user?.role === 'admin');
+      console.log('🔐 [LoginPage] user?.role === "super_admin":', user?.role === 'super_admin');
 
       toast.success(`¡Bienvenido ${user?.full_name || user?.email}!`);
 
       // Redirect based on user role (EXACTLY like tutorías Login.tsx lines 79-84)
       if (user?.role === 'admin' || user?.role === 'super_admin') {
+        console.log('✅ [LoginPage] ES ADMIN - Redirigiendo a /admin');
         navigate('/admin', { replace: true });
       } else {
+        console.log('👤 [LoginPage] Usuario regular - Redirigiendo a:', from);
         navigate(from, { replace: true });
       }
     } catch (error) {
+      console.error('❌ [LoginPage] Error:', error);
       toast.error('Correo o contraseña inválidos');
     }
   };
