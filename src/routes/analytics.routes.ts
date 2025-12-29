@@ -64,4 +64,67 @@ router.get('/sales-overview', authenticate, requireAdmin, async (req: Request, r
   }
 });
 
+// Get product stats for admin
+router.get('/products/:productId/stats', authenticate, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await analyticsService.getProductStats(req.params.productId);
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get all products with stats for admin dashboard
+router.get('/products', authenticate, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+    const data = await analyticsService.getAllProductsWithStats(limit, offset);
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get revenue by category
+router.get('/revenue-by-category', authenticate, requireAdmin, async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await analyticsService.getRevenueByCategory();
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get monthly revenue comparison
+router.get('/monthly-revenue', authenticate, requireAdmin, async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await analyticsService.getMonthlyRevenueComparison();
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get recent orders
+router.get('/recent-orders', authenticate, requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+    const data = await analyticsService.getRecentOrders(limit);
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get sales by gender
+router.get('/sales-by-gender', authenticate, requireAdmin, async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await analyticsService.getSalesByGender();
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

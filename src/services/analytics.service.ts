@@ -79,6 +79,7 @@ export const analyticsService = {
   async getTopProducts(limit = 10) {
     const result = await query(
       `SELECT p.id, p.name, p.price, SUM(oi.quantity) as total_sold,
+        COALESCE(SUM(oi.total), 0) as total_revenue,
         (SELECT json_agg(pi) FROM product_images pi WHERE pi.product_id = p.id LIMIT 1) as images
        FROM order_items oi
        JOIN products p ON oi.product_id = p.id
@@ -111,6 +112,156 @@ export const analyticsService = {
        WHERE created_at >= NOW() - INTERVAL '${days} days'
        GROUP BY DATE(created_at)
        ORDER BY date`
+    );
+
+    return result.rows;
+  },
+
+  // Get product stats for admin (sales, revenue, stock)
+  async getProductStats(productId: string) {
+    const productResult = await query(
+      `SELECT
+        p.id,
+        p.name,
+        p.price,
+        p.quantity,
+        p.sku,
+        p.is_active,
+        p.is_featured,
+        (SELECT json_agg(pi) FROM product_images pi WHERE pi.product_id = p.id LIMIT 1) as images,
+        COALESCE(
+          (SELECT SUM(oi.quantity) FROM order_items oi
+           JOIN orders o ON oi.order_id = o.id
+           WHERE oi.product_id = p.id AND o.status NOT IN ('cancelled', 'refunded')), 0
+        ) as total_sold,
+        COALESCE(
+          (SELECT COUNT(*) FROM order_items oi
+           JOIN orders o ON oi.order_id = o.id
+           WHERE oi.product_id = p.id AND o.status NOT IN ('cancelled', 'refunded')), 0
+        ) as order_count,
+        COALESCE(
+          (SELECT SUM(oi.total) FROM order_items oi
+           JOIN orders o ON oi.order_id = o.id
+           WHERE oi.product_id = p.id AND o.status NOT IN ('cancelled', 'refunded')), 0
+        ) as total_revenue
+       FROM products p
+       WHERE p.id = $1
+       GROUP BY p.id`,
+      [productId]
+    );
+
+    return productResult.rows[0] || null;
+  },
+
+  // Get all products with their stats for admin dashboard
+  async getAllProductsWithStats(limit = 50, offset = 0) {
+    const result = await query(
+      `SELECT
+        p.id,
+        p.name,
+        p.price,
+        p.quantity,
+        p.sku,
+        p.is_active,
+        p.is_featured,
+        p.created_at,
+        COALESCE(
+          (SELECT json_agg(pi) FROM product_images pi WHERE pi.product_id = p.id AND pi.is_primary = true LIMIT 1), '[]'
+        ) as images,
+        COALESCE(
+          (SELECT SUM(oi.quantity) FROM order_items oi
+           JOIN orders o ON oi.order_id = o.id
+           WHERE oi.product_id = p.id AND o.status NOT IN ('cancelled', 'refunded')), 0
+        ) as total_sold,
+        COALESCE(
+          (SELECT COUNT(*) FROM order_items oi
+           JOIN orders o ON oi.order_id = o.id
+           WHERE oi.product_id = p.id AND o.status NOT IN ('cancelled', 'refunded')), 0
+        ) as order_count,
+        COALESCE(
+          (SELECT SUM(oi.total) FROM order_items oi
+           JOIN orders o ON oi.order_id = o.id
+           WHERE oi.product_id = p.id AND o.status NOT IN ('cancelled', 'refunded')), 0
+        ) as total_revenue
+       FROM products p
+       ORDER BY p.created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+
+    return result.rows;
+  },
+
+  // Get revenue by category
+  async getRevenueByCategory() {
+    const result = await query(
+      `SELECT
+        c.id,
+        c.name,
+        c.slug,
+        COALESCE(SUM(oi.total), 0) as revenue,
+        COALESCE(SUM(oi.quantity), 0) as items_sold,
+        COUNT(DISTINCT oi.order_id) as orders_count
+       FROM categories c
+       LEFT JOIN products p ON p.category_id = c.id
+       LEFT JOIN order_items oi ON oi.product_id = p.id
+       LEFT JOIN orders o ON oi.order_id = o.id AND o.status NOT IN ('cancelled', 'refunded')
+       WHERE c.is_active = true
+       GROUP BY c.id, c.name, c.slug
+       ORDER BY revenue DESC`
+    );
+
+    return result.rows;
+  },
+
+  // Get monthly revenue comparison
+  async getMonthlyRevenueComparison() {
+    const result = await query(
+      `SELECT
+        TO_CHAR(DATE_TRUNC('month', created_at), 'YYYY-MM') as month,
+        TO_CHAR(DATE_TRUNC('month', created_at), 'Mon YYYY') as month_label,
+        SUM(total) as revenue,
+        COUNT(*) as orders
+       FROM orders
+       WHERE created_at >= NOW() - INTERVAL '12 months'
+         AND status NOT IN ('cancelled', 'refunded')
+       GROUP BY DATE_TRUNC('month', created_at)
+       ORDER BY month`
+    );
+
+    return result.rows;
+  },
+
+  // Get recent orders for admin
+  async getRecentOrders(limit = 10) {
+    const result = await query(
+      `SELECT o.*,
+        u.full_name,
+        u.email
+       FROM orders o
+       LEFT JOIN users u ON o.user_id = u.id
+       ORDER BY o.created_at DESC
+       LIMIT $1`,
+      [limit]
+    );
+
+    return result.rows;
+  },
+
+  // Get sales by gender
+  async getSalesByGender() {
+    const result = await query(
+      `SELECT
+        p.gender,
+        COALESCE(SUM(oi.quantity), 0) as items_sold,
+        COALESCE(SUM(oi.total), 0) as revenue,
+        COUNT(DISTINCT oi.order_id) as orders
+       FROM products p
+       LEFT JOIN order_items oi ON oi.product_id = p.id
+       LEFT JOIN orders o ON oi.order_id = o.id AND o.status NOT IN ('cancelled', 'refunded')
+       WHERE p.gender IS NOT NULL
+       GROUP BY p.gender
+       ORDER BY revenue DESC`
     );
 
     return result.rows;

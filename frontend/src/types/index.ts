@@ -339,6 +339,75 @@ export interface DashboardMetrics {
   orders_change: number;
 }
 
+// Product Stats for Admin
+export interface ProductStats {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  sku: string;
+  is_active: boolean;
+  is_featured: boolean;
+  images: ProductImage[];
+  total_sold: number;
+  order_count: number;
+  total_revenue: number;
+}
+
+// Extended Product with Stats for Admin
+export interface ProductWithStats extends Omit<Product, 'category'> {
+  images: ProductImage[];
+  total_sold: number;
+  order_count: number;
+  total_revenue: number;
+}
+
+// Category Revenue
+export interface CategoryRevenue {
+  id: string;
+  name: string;
+  slug: string;
+  revenue: number;
+  items_sold: number;
+  orders_count: number;
+}
+
+// Monthly Revenue
+export interface MonthlyRevenue {
+  month: string;
+  month_label: string;
+  revenue: number;
+  orders: number;
+}
+
+// Sales by Gender
+export interface SalesByGender {
+  gender: string;
+  items_sold: number;
+  revenue: number;
+  orders: number;
+}
+
+// Sales Overview
+export interface SalesOverview {
+  date: string;
+  orders: number;
+  revenue: number;
+}
+
+// Chart Data Types
+export interface ChartDataPoint {
+  name: string;
+  value: number;
+  [key: string]: string | number;
+}
+
+export interface LineChartData {
+  date: string;
+  revenue: number;
+  orders?: number;
+}
+
 // Chat/WhatsApp Types
 export interface ChatMessage {
   id: string;

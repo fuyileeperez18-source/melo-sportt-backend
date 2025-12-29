@@ -13,6 +13,12 @@ import type {
   ChatMessage,
   DashboardMetrics,
   Address,
+  ProductStats,
+  ProductWithStats,
+  CategoryRevenue,
+  MonthlyRevenue,
+  SalesByGender,
+  SalesOverview,
 } from '@/types';
 
 // ============================================
@@ -493,7 +499,7 @@ export const analyticsService = {
   },
 
   async getTopProducts(limit = 10) {
-    const response = await api.get<Array<{ id: string; name: string; price: number; total_sold: number; images: any[] }>>('/analytics/top-products', {
+    const response = await api.get<Array<{ id: string; name: string; price: number; total_sold: number; total_revenue: number; images: any[] }>>('/analytics/top-products', {
       limit: limit.toString(),
     });
     return response.data || [];
@@ -501,6 +507,54 @@ export const analyticsService = {
 
   async getOrdersByStatus() {
     const response = await api.get<Array<{ status: string; count: number }>>('/analytics/orders-by-status');
+    return response.data || [];
+  },
+
+  async getSalesOverview(days = 30) {
+    const response = await api.get<SalesOverview[]>('/analytics/sales-overview', {
+      days: days.toString(),
+    });
+    return response.data || [];
+  },
+
+  // Get product stats for admin
+  async getProductStats(productId: string) {
+    const response = await api.get<ProductStats>(`/analytics/products/${productId}/stats`);
+    return response.data;
+  },
+
+  // Get all products with stats for admin dashboard
+  async getAllProductsWithStats(limit = 50, offset = 0) {
+    const response = await api.get<ProductWithStats[]>('/analytics/products', {
+      limit: limit.toString(),
+      offset: offset.toString(),
+    });
+    return response.data || [];
+  },
+
+  // Get revenue by category
+  async getRevenueByCategory() {
+    const response = await api.get<CategoryRevenue[]>('/analytics/revenue-by-category');
+    return response.data || [];
+  },
+
+  // Get monthly revenue comparison
+  async getMonthlyRevenue() {
+    const response = await api.get<MonthlyRevenue[]>('/analytics/monthly-revenue');
+    return response.data || [];
+  },
+
+  // Get recent orders
+  async getRecentOrders(limit = 10) {
+    const response = await api.get<Order[]>('/analytics/recent-orders', {
+      limit: limit.toString(),
+    });
+    return response.data || [];
+  },
+
+  // Get sales by gender
+  async getSalesByGender() {
+    const response = await api.get<SalesByGender[]>('/analytics/sales-by-gender');
     return response.data || [];
   },
 };
