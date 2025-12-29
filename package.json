@@ -1,17 +1,17 @@
 {
-  "name": "melo-sportt-backend",
+  "name": "melo-sportt",
   "version": "1.0.0",
-  "description": "Backend API for MELO SPORTT",
-  "main": "dist/index.js",
+  "description": "E-commerce MELO SPORTT - Frontend + Backend",
+  "main": "backend/dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch backend/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node backend/dist/index.js",
     "typecheck": "tsc --noEmit",
-    "seed:admins": "tsx src/scripts/seed-admins.ts",
-    "migrate": "tsx src/scripts/run-migration.ts",
-    "migrate:all": "tsx src/scripts/run-migration.ts",
-    "setup:team": "tsx src/scripts/setup-team.ts",
+    "seed:admins": "tsx backend/scripts/seed-admins.ts",
+    "migrate": "tsx backend/scripts/run-migration.ts",
+    "migrate:all": "tsx backend/scripts/run-migration.ts",
+    "setup:team": "tsx backend/scripts/setup-team.ts",
     "db:setup": "npm run migrate:all && npm run seed:admins"
   },
   "keywords": [
