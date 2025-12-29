@@ -347,7 +347,7 @@ export function CheckoutPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link to="/" className="text-2xl font-bold text-white">
-            BORIS
+            MELO SPORTT
           </Link>
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <Lock className="h-4 w-4" />
