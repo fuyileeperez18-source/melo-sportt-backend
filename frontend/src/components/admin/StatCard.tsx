@@ -17,8 +17,8 @@ export function StatCard({
   value,
   change,
   icon: Icon,
-  iconColor = 'text-indigo-600',
-  iconBg = 'bg-indigo-100',
+  iconColor = 'text-white',
+  iconBg = 'bg-white/10',
   format = 'number',
   delay = 0,
 }: StatCardProps) {
@@ -47,7 +47,7 @@ export function StatCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group"
+      className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all duration-300 group"
     >
       <div className="flex items-center justify-between mb-4">
         <div className={`p-3 rounded-xl ${iconBg} group-hover:scale-110 transition-transform duration-300`}>
@@ -55,12 +55,12 @@ export function StatCard({
         </div>
         {change !== undefined && (
           <div
-            className={`flex items-center gap-1 text-sm font-medium px-2 py-1 rounded-full ${
+            className={`flex items-center gap-1 text-sm font-medium px-2.5 py-1 rounded-full ${
               isPositive
-                ? 'bg-emerald-50 text-emerald-600'
+                ? 'bg-emerald-500/20 text-emerald-400'
                 : isNegative
-                ? 'bg-red-50 text-red-600'
-                : 'bg-gray-50 text-gray-600'
+                ? 'bg-red-500/20 text-red-400'
+                : 'bg-white/10 text-gray-400'
             }`}
           >
             {isPositive && (
@@ -78,8 +78,8 @@ export function StatCard({
         )}
       </div>
       <div>
-        <p className="text-sm text-gray-500 font-medium">{title}</p>
-        <p className="text-3xl font-bold text-gray-900 mt-1">{formatValue(value)}</p>
+        <p className="text-sm text-gray-400 font-medium">{title}</p>
+        <p className="text-3xl font-bold text-white mt-1">{formatValue(value)}</p>
       </div>
     </motion.div>
   );
@@ -89,15 +89,16 @@ interface MiniStatProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  color: 'blue' | 'green' | 'orange' | 'purple' | 'pink';
+  color: 'blue' | 'green' | 'orange' | 'purple' | 'pink' | 'white';
 }
 
 const colorClasses = {
-  blue: { bg: 'bg-blue-50', icon: 'text-blue-600', dot: 'bg-blue-500' },
-  green: { bg: 'bg-emerald-50', icon: 'text-emerald-600', dot: 'bg-emerald-500' },
-  orange: { bg: 'bg-orange-50', icon: 'text-orange-600', dot: 'bg-orange-500' },
-  purple: { bg: 'bg-purple-50', icon: 'text-purple-600', dot: 'bg-purple-500' },
-  pink: { bg: 'bg-pink-50', icon: 'text-pink-600', dot: 'bg-pink-500' },
+  blue: { bg: 'bg-blue-500/10', icon: 'text-blue-400', dot: 'bg-blue-500' },
+  green: { bg: 'bg-emerald-500/10', icon: 'text-emerald-400', dot: 'bg-emerald-500' },
+  orange: { bg: 'bg-orange-500/10', icon: 'text-orange-400', dot: 'bg-orange-500' },
+  purple: { bg: 'bg-purple-500/10', icon: 'text-purple-400', dot: 'bg-purple-500' },
+  pink: { bg: 'bg-pink-500/10', icon: 'text-pink-400', dot: 'bg-pink-500' },
+  white: { bg: 'bg-white/10', icon: 'text-white', dot: 'bg-white' },
 };
 
 export function MiniStat({ title, value, icon: Icon, color }: MiniStatProps) {
@@ -106,14 +107,14 @@ export function MiniStat({ title, value, icon: Icon, color }: MiniStatProps) {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className={`flex items-center gap-4 p-4 rounded-xl ${colors.bg} cursor-pointer transition-all duration-200`}
+      className={`flex items-center gap-4 p-4 rounded-xl ${colors.bg} cursor-pointer transition-all duration-200 border border-white/5`}
     >
-      <div className={`p-2 rounded-lg bg-white shadow-sm`}>
+      <div className={`p-2.5 rounded-lg bg-white/5`}>
         <Icon className={`w-5 h-5 ${colors.icon}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-600 truncate">{title}</p>
-        <p className="text-xl font-bold text-gray-900">{value}</p>
+        <p className="text-sm text-gray-400 truncate">{title}</p>
+        <p className="text-xl font-bold text-white">{value}</p>
       </div>
       <div className={`w-2 h-2 rounded-full ${colors.dot}`} />
     </motion.div>

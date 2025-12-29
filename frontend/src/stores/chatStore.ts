@@ -37,14 +37,15 @@ interface ChatState {
 
 // Predefined bot responses
 const botResponses: Record<string, string> = {
-  greeting: '¡Hola! 👋 Bienvenido a MELO SPORTT. ¿En qué puedo ayudarte hoy?',
-  products: 'Tenemos una amplia variedad de productos. Puedes explorar nuestro catálogo en la sección de Productos o decirme qué estás buscando.',
-  shipping: 'Realizamos envíos a toda Colombia. Los tiempos de entrega varían entre 2-5 días hábiles según tu ubicación en el país.',
-  payment: 'Aceptamos todas las tarjetas de crédito/débito, transferencias bancarias y pagos en efectivo.',
-  returns: 'Tienes 30 días para realizar devoluciones. El producto debe estar sin usar y en su empaque original.',
-  hours: 'Atendemos de Lunes a Viernes de 9:00 AM a 6:00 PM. Sábados de 10:00 AM a 2:00 PM.',
-  contact: 'Puedes contactarnos por WhatsApp al +57 300 123 4567 o por email a contacto@melosportt.com',
-  default: 'Gracias por tu mensaje. Un agente se pondrá en contacto contigo pronto. ¿Hay algo más en lo que pueda ayudarte?',
+  greeting: '¡Hola! 👋 Bienvenido a BORIS. ¿En qué puedo ayudarte hoy? Tambien puedes solicitar hablar con un agente en tiempo real.',
+  products: 'Tenemos una amplia variedad de productos. Puedes explorar nuestro catalogo en la seccion de Productos o decirme que estas buscando.',
+  shipping: 'Realizamos envios a toda Colombia. Los tiempos de entrega varian entre 2-5 dias habiles segun tu ubicacion en el pais.',
+  payment: 'Aceptamos todas las tarjetas de credito/debito, transferencias bancarias y pagos en efectivo.',
+  returns: 'Tienes 30 dias para realizar devoluciones. El producto debe estar sin usar y en su empaque original.',
+  hours: 'Atendemos de Lunes a Viernes de 9:00 AM a 6:00 PM. Sabados de 10:00 AM a 2:00 PM.',
+  contact: 'Puedes contactarnos por WhatsApp al +57 300 123 4567 o por email a contacto@boris.com.co. Tambien puedes solicitar hablar con un agente en tiempo real.',
+  agent: 'Un agente te contactara en breve. Por favor, introduce tu numero de WhatsApp para que pueda comunicarme contigo en tiempo real.',
+  default: 'Gracias por tu mensaje. Un agente se pondra en contacto contigo en breve. Mientras tanto, puedes solicitar hablar con un agente en tiempo real.',
 };
 
 const quickReplies: QuickReply[] = [
@@ -212,10 +213,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     if (lowerMessage.includes('hola') || lowerMessage.includes('hi') || lowerMessage.includes('buenos')) {
       return botResponses.greeting;
     }
-    if (lowerMessage.includes('producto') || lowerMessage.includes('ropa') || lowerMessage.includes('catálogo')) {
+    if (lowerMessage.includes('producto') || lowerMessage.includes('ropa') || lowerMessage.includes('catalogo') || lowerMessage.includes('catálogo')) {
       return botResponses.products;
     }
-    if (lowerMessage.includes('envío') || lowerMessage.includes('envio') || lowerMessage.includes('entrega')) {
+    if (lowerMessage.includes('envio') || lowerMessage.includes('envío') || lowerMessage.includes('entrega')) {
       return botResponses.shipping;
     }
     if (lowerMessage.includes('pago') || lowerMessage.includes('tarjeta') || lowerMessage.includes('pagar')) {
@@ -229,6 +230,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
     if (lowerMessage.includes('contacto') || lowerMessage.includes('whatsapp') || lowerMessage.includes('email')) {
       return botResponses.contact;
+    }
+    if (lowerMessage.includes('agente') || lowerMessage.includes('hablar') || lowerMessage.includes('persona') || lowerMessage.includes('real')) {
+      return botResponses.agent;
     }
 
     return botResponses.default;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -26,10 +26,12 @@ import {
 
 import { useAuthStore } from '@/stores/authStore';
 import { cn, formatCurrency } from '@/lib/utils';
-import { analyticsService } from '@/lib/services';
+import { analyticsService, orderService } from '@/lib/services';
 import { StatCard, MiniStat } from '@/components/admin/StatCard';
 import { RevenueChart, OrdersChart, CategoryChart, MonthlyChart, GenderChart } from '@/components/admin/Charts';
 import type { DashboardMetrics, Order, SalesOverview, CategoryRevenue, MonthlyRevenue, SalesByGender } from '@/types';
+import { useOrdersRealtime, useProductRealtime } from '@/hooks/useRealtime';
+import toast from 'react-hot-toast';
 
 // Sidebar navigation
 const sidebarItems = [
@@ -46,13 +48,13 @@ const sidebarItems = [
 // Order status badge
 function OrderStatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    pending: 'bg-amber-100 text-amber-700',
-    confirmed: 'bg-blue-100 text-blue-700',
-    processing: 'bg-purple-100 text-purple-700',
-    shipped: 'bg-cyan-100 text-cyan-700',
-    delivered: 'bg-emerald-100 text-emerald-700',
-    cancelled: 'bg-red-100 text-red-700',
-    refunded: 'bg-gray-100 text-gray-700',
+    pending: 'bg-amber-500/20 text-amber-400',
+    confirmed: 'bg-blue-500/20 text-blue-400',
+    processing: 'bg-purple-500/20 text-purple-400',
+    shipped: 'bg-cyan-500/20 text-cyan-400',
+    delivered: 'bg-emerald-500/20 text-emerald-400',
+    cancelled: 'bg-red-500/20 text-red-400',
+    refunded: 'bg-gray-500/20 text-gray-400',
   };
 
   const labels: Record<string, string> = {
@@ -66,7 +68,7 @@ function OrderStatusBadge({ status }: { status: string }) {
   };
 
   return (
-    <span className={cn('px-2.5 py-1 rounded-full text-xs font-medium capitalize', styles[status] || 'bg-gray-100 text-gray-700')}>
+    <span className={cn('px-2.5 py-1 rounded-full text-xs font-medium capitalize', styles[status] || 'bg-gray-500/20 text-gray-400')}>
       {labels[status] || status}
     </span>
   );
@@ -240,33 +242,74 @@ export function AdminDashboard() {
 
   useEffect(() => {
     fetchData();
+
+    // Auto-refresh cada 30 segundos
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
+
+  // Realtime: Escuchar nuevos pedidos
+  useOrdersRealtime((payload) => {
+    console.log('[Realtime] Nuevo pedido:', payload);
+    // Mostrar notificación
+    toast.custom((t) => (
+      <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} bg-white text-black px-4 py-3 rounded-xl shadow-lg flex items-center gap-3`}>
+        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+        <div>
+          <p className="font-medium">Nuevo pedido!</p>
+          <p className="text-sm text-gray-500">Se actualizará el dashboard</p>
+        </div>
+      </div>
+    ));
+    // Refrescar datos
+    fetchData();
+  });
+
+  // Realtime: Escuchar cambios en productos (stock)
+  useProductRealtime((payload) => {
+    console.log('[Realtime] Cambio en producto:', payload);
+    if (payload.eventType === 'UPDATE' && payload.new.quantity !== payload.old?.quantity) {
+      toast.custom((t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} bg-white text-black px-4 py-3 rounded-xl shadow-lg flex items-center gap-3`}>
+          <PackageIcon className="w-5 h-5 text-blue-500" />
+          <div>
+            <p className="font-medium">Stock actualizado</p>
+            <p className="text-sm text-gray-500">Producto: {payload.new.name?.slice(0, 30)}...</p>
+          </div>
+        </div>
+      ));
+    }
+    fetchData();
+  });
 
   // Calculate total revenue from sales overview
   const totalRevenue = salesOverview.reduce((acc, item) => acc + (item.revenue || 0), 0);
   const totalOrders = salesOverview.reduce((acc, item) => acc + (item.orders || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-black flex">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col">
         {/* Top bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-30">
+        <header className="h-16 bg-black/50 backdrop-blur-xl border-b border-gray-800 flex items-center justify-between px-6 sticky top-0 z-30">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="lg:hidden p-2 rounded-xl hover:bg-white/10 transition-colors"
             >
-              <Menu className="h-5 w-5 text-gray-600" />
+              <Menu className="h-5 w-5 text-white" />
             </button>
             <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
               <input
                 type="text"
                 placeholder="Buscar productos, pedidos..."
-                className="w-72 h-10 pl-10 pr-4 bg-gray-100 border-none rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-72 h-11 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all"
               />
             </div>
           </div>
@@ -275,20 +318,20 @@ export function AdminDashboard() {
             <button
               onClick={fetchData}
               disabled={loading}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+              className="p-2 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50"
             >
-              <RefreshCw className={`h-5 w-5 text-gray-600 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-5 w-5 text-white ${loading ? 'animate-spin' : ''}`} />
             </button>
-            <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <Bell className="h-5 w-5 text-gray-600" />
-              <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
+            <button className="relative p-2 rounded-xl hover:bg-white/10 transition-colors">
+              <Bell className="h-5 w-5 text-white" />
+              <span className="absolute top-1 right-1 h-2 w-2 bg-white rounded-full" />
             </button>
-            <div className="h-8 w-px bg-gray-200" />
+            <div className="h-8 w-px bg-gray-800" />
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-9 h-9 bg-gradient-to-br from-white to-gray-400 rounded-full flex items-center justify-center text-black font-bold text-sm">
                 A
               </div>
-              <ChevronDown className="h-4 w-4 text-gray-400" />
+              <ChevronDown className="h-4 w-4 text-gray-500" />
             </div>
           </div>
         </header>
@@ -299,18 +342,18 @@ export function AdminDashboard() {
             {loading && !metrics ? (
               <div className="flex items-center justify-center h-96">
                 <div className="text-center">
-                  <RefreshCw className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-4" />
-                  <p className="text-gray-500">Cargando estadísticas...</p>
+                  <RefreshCw className="h-8 w-8 animate-spin text-white mx-auto mb-4" />
+                  <p className="text-gray-400">Cargando estadísticas...</p>
                 </div>
               </div>
             ) : error ? (
               <div className="flex items-center justify-center h-96">
                 <div className="text-center">
                   <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
-                  <p className="text-gray-700 font-medium mb-2">{error}</p>
+                  <p className="text-white font-medium mb-2">{error}</p>
                   <button
                     onClick={fetchData}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="px-4 py-2 bg-white text-black rounded-xl hover:bg-gray-200 transition-colors"
                   >
                     Reintentar
                   </button>
@@ -321,8 +364,8 @@ export function AdminDashboard() {
                 {/* Page title */}
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-                    <p className="text-gray-500">Bienvenido de nuevo. Aquí están tus estadísticas en tiempo real.</p>
+                    <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+                    <p className="text-gray-400">Bienvenido de nuevo. Aquí están tus estadísticas en tiempo real.</p>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Clock className="h-4 w-4" />
@@ -337,8 +380,8 @@ export function AdminDashboard() {
                     value={metrics?.today_revenue || 0}
                     change={metrics?.revenue_change}
                     icon={DollarSign}
-                    iconColor="text-emerald-600"
-                    iconBg="bg-emerald-100"
+                    iconColor="text-white"
+                    iconBg="bg-white/10"
                     format="currency"
                     delay={0}
                   />
@@ -347,24 +390,24 @@ export function AdminDashboard() {
                     value={metrics?.today_orders || 0}
                     change={metrics?.orders_change}
                     icon={ShoppingCart}
-                    iconColor="text-blue-600"
-                    iconBg="bg-blue-100"
+                    iconColor="text-white"
+                    iconBg="bg-white/10"
                     delay={0.1}
                   />
                   <StatCard
                     title="Pedidos Pendientes"
                     value={metrics?.pending_orders || 0}
                     icon={Clock}
-                    iconColor="text-amber-600"
-                    iconBg="bg-amber-100"
+                    iconColor="text-white"
+                    iconBg="bg-white/10"
                     delay={0.2}
                   />
                   <StatCard
                     title="Stock Bajo"
                     value={metrics?.low_stock_products || 0}
                     icon={AlertTriangle}
-                    iconColor="text-orange-600"
-                    iconBg="bg-orange-100"
+                    iconColor="text-white"
+                    iconBg="bg-white/10"
                     delay={0.3}
                   />
                 </div>
@@ -375,25 +418,25 @@ export function AdminDashboard() {
                     title="Ingresos Totales"
                     value={formatCurrency(totalRevenue)}
                     icon={DollarSign}
-                    color="green"
+                    color="white"
                   />
                   <MiniStat
                     title="Total Pedidos"
                     value={totalOrders}
                     icon={ShoppingCart}
-                    color="blue"
+                    color="white"
                   />
                   <MiniStat
                     title="Nuevos Clientes"
                     value={metrics?.new_customers_today || 0}
                     icon={Users}
-                    color="purple"
+                    color="white"
                   />
                   <MiniStat
                     title="Productos Activos"
                     value={topProducts.length}
                     icon={PackageIcon}
-                    color="pink"
+                    color="white"
                   />
                 </div>
 
@@ -431,33 +474,33 @@ export function AdminDashboard() {
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+                    className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
                   >
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-lg font-semibold text-gray-900">Pedidos Recientes</h2>
+                      <h2 className="text-lg font-semibold text-white">Pedidos Recientes</h2>
                       <Link
                         to="/admin/orders"
-                        className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1 font-medium"
+                        className="text-sm text-gray-400 hover:text-white flex items-center gap-1 font-medium transition-colors"
                       >
                         Ver todos <TrendingUp className="h-4 w-4" />
                       </Link>
                     </div>
                     <div className="space-y-4">
                       {recentOrders.length > 0 ? recentOrders.map((order) => (
-                        <div key={order.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+                        <div key={order.id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-white/5">
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                            <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white font-medium">
                               {order.user?.full_name?.[0] || order.user?.email?.[0] || 'C'}
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900">
+                              <p className="font-medium text-white">
                                 {order.user?.full_name || 'Cliente'}
                               </p>
                               <p className="text-sm text-gray-500">{order.order_number}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-gray-900">{formatCurrency(order.total)}</p>
+                            <p className="font-bold text-white">{formatCurrency(order.total)}</p>
                             <OrderStatusBadge status={order.status} />
                           </div>
                         </div>
@@ -472,32 +515,32 @@ export function AdminDashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+                    className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
                   >
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-lg font-semibold text-gray-900">Productos Más Vendidos</h2>
+                      <h2 className="text-lg font-semibold text-white">Productos Más Vendidos</h2>
                       <Link
                         to="/admin/products"
-                        className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1 font-medium"
+                        className="text-sm text-gray-400 hover:text-white flex items-center gap-1 font-medium transition-colors"
                       >
                         Ver todos <TrendingUp className="h-4 w-4" />
                       </Link>
                     </div>
                     <div className="space-y-4">
                       {topProducts.length > 0 ? topProducts.map((product, index) => (
-                        <div key={product.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
-                          <span className="text-gray-400 font-bold w-6">{index + 1}</span>
+                        <div key={product.id} className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-white/5">
+                          <span className="text-gray-500 font-bold w-6">{index + 1}</span>
                           <img
                             src={product.images?.[0]?.url || 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=100'}
                             alt={product.name}
                             className="w-12 h-12 rounded-xl object-cover"
                           />
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">{product.name}</p>
+                            <p className="font-medium text-white truncate">{product.name}</p>
                             <p className="text-sm text-gray-500">{product.total_sold || 0} vendidos</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-gray-900">{formatCurrency(product.total_revenue || 0)}</p>
+                            <p className="font-bold text-white">{formatCurrency(product.total_revenue || 0)}</p>
                             <p className="text-xs text-gray-500">{formatCurrency(product.price)} c/u</p>
                           </div>
                         </div>
@@ -511,7 +554,7 @@ export function AdminDashboard() {
             )}
           </main>
         ) : (
-          <main className="flex-1 p-6 overflow-y-auto bg-gray-50">
+          <main className="flex-1 p-6 overflow-y-auto">
             <Outlet />
           </main>
         )}

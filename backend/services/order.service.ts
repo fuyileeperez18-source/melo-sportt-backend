@@ -11,39 +11,66 @@ interface OrderFilters {
 }
 
 export const orderService = {
-  async create(orderData: Partial<Order>, items: Partial<OrderItem>[]): Promise<Order> {
+  async create(orderData: Partial<Order> & { items: Partial<OrderItem>[] }, reduceStock = true): Promise<Order> {
     const client = await (await import('../config/database.js')).pool.connect();
 
     try {
       await client.query('BEGIN');
 
-      // Create order
+      // Validate stock availability before creating order
+      if (reduceStock) {
+        for (const item of orderData.items || []) {
+          const productResult = await client.query(
+            `SELECT id, name, quantity, track_quantity, continue_selling_when_out_of_stock
+             FROM products WHERE id = $1`,
+            [item.product_id]
+          );
+
+          if (productResult.rows.length === 0) {
+            throw new AppError(`Producto ${item.product_id} no encontrado`, 404);
+          }
+
+          const product = productResult.rows[0];
+
+          if (product.track_quantity) {
+            if (product.quantity < (item.quantity || 0) && !product.continue_selling_when_out_of_stock) {
+              throw new AppError(`No hay suficiente stock para ${product.name}. Disponible: ${product.quantity}`, 400);
+            }
+          }
+        }
+      }
+
+      // Create order with order_number
       const orderResult = await client.query(
-        `INSERT INTO orders (user_id, subtotal, discount, shipping_cost, tax, total, status,
-          payment_status, payment_method, shipping_address, billing_address, notes, coupon_code)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        `INSERT INTO orders (user_id, order_number, subtotal, discount, shipping_cost, tax, total, status,
+          payment_status, payment_method, payment_id, stripe_payment_intent_id, shipping_address, billing_address, notes, coupon_code)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
          RETURNING *`,
         [
           orderData.user_id,
+          orderData.order_number || `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
           orderData.subtotal,
           orderData.discount || 0,
           orderData.shipping_cost || 0,
           orderData.tax || 0,
           orderData.total,
-          'pending',
-          'pending',
-          orderData.payment_method,
+          orderData.status || 'pending',
+          orderData.payment_status || 'pending',
+          orderData.payment_method || 'card',
+          orderData.payment_id || null,
+          orderData.stripe_payment_intent_id || null,
           JSON.stringify(orderData.shipping_address),
           JSON.stringify(orderData.billing_address || orderData.shipping_address),
-          orderData.notes,
-          orderData.coupon_code,
+          orderData.notes || null,
+          orderData.coupon_code || null,
         ]
       );
 
       const order = orderResult.rows[0] as Order;
 
-      // Create order items
-      for (const item of items) {
+      // Create order items and reduce stock
+      for (const item of orderData.items || []) {
+        // Create order item
         await client.query(
           `INSERT INTO order_items (order_id, product_id, variant_id, quantity, price, total)
            VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -56,6 +83,29 @@ export const orderService = {
             (item.price || 0) * (item.quantity || 0),
           ]
         );
+
+        // Reduce product stock
+        if (reduceStock) {
+          await client.query(
+            `UPDATE products
+             SET quantity = quantity - $1,
+                 total_sold = COALESCE(total_sold, 0) + $1,
+                 updated_at = NOW()
+             WHERE id = $2 AND track_quantity = true`,
+            [item.quantity, item.product_id]
+          );
+
+          // Update variant stock if applicable
+          if (item.variant_id) {
+            await client.query(
+              `UPDATE product_variants
+               SET quantity = quantity - $1,
+                   updated_at = NOW()
+               WHERE id = $2`,
+              [item.quantity, item.variant_id]
+            );
+          }
+        }
       }
 
       await client.query('COMMIT');

@@ -511,7 +511,7 @@ export function HomePage() {
         <div className="relative container mx-auto px-6 text-center">
           <AnimatedSection animation="scale">
             <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Únete a la Familia MELO SPORTT
+              Únete a la Familia BORIS
             </h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
               Sé el primero en conocer nuevas colecciones, ofertas exclusivas y consejos de estilo.

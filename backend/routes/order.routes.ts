@@ -8,31 +8,43 @@ import type { AuthRequest, OrderStatus } from '../types/index.js';
 const router = Router();
 
 const addressSchema = z.object({
-  label: z.string(),
-  street: z.string(),
-  city: z.string(),
-  state: z.string(),
-  postal_code: z.string(),
-  country: z.string().default('US'),
+  email: z.string().email().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  apartment: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  postalCode: z.string().optional(),
+  country: z.string().optional(),
+  label: z.string().optional(),
+  street: z.string().optional(),
 });
 
 const orderItemSchema = z.object({
-  product_id: z.string().uuid(),
-  variant_id: z.string().uuid().optional(),
+  product_id: z.string(),
+  variant_id: z.string().optional(),
   quantity: z.number().int().positive(),
   price: z.number().positive(),
 });
 
 const createOrderSchema = z.object({
+  user_id: z.string().optional(),
+  order_number: z.string().optional(),
   items: z.array(orderItemSchema).min(1),
   shipping_address: addressSchema,
   billing_address: addressSchema.optional(),
-  payment_method: z.string(),
+  payment_method: z.string().default('card'),
+  payment_id: z.string().optional(),
+  stripe_payment_intent_id: z.string().optional(),
   subtotal: z.number().positive(),
   discount: z.number().min(0).default(0),
   shipping_cost: z.number().min(0).default(0),
   tax: z.number().min(0).default(0),
   total: z.number().positive(),
+  status: z.enum(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded']).optional(),
+  payment_status: z.enum(['pending', 'paid', 'failed', 'refunded', 'partially_refunded']).optional(),
   notes: z.string().optional(),
   coupon_code: z.string().optional(),
 });
@@ -51,22 +63,24 @@ router.get('/my-orders', authenticate, async (req: AuthRequest, res: Response, n
 router.post('/', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const data = createOrderSchema.parse(req.body);
-    const order = await orderService.create(
-      {
-        user_id: req.user!.id,
-        subtotal: data.subtotal,
-        discount: data.discount,
-        shipping_cost: data.shipping_cost,
-        tax: data.tax,
-        total: data.total,
-        payment_method: data.payment_method,
-        shipping_address: data.shipping_address as any,
-        billing_address: data.billing_address as any,
-        notes: data.notes,
-        coupon_code: data.coupon_code,
-      },
-      data.items
-    );
+    const order = await orderService.create({
+      user_id: data.user_id || req.user!.id,
+      order_number: data.order_number,
+      subtotal: data.subtotal,
+      discount: data.discount,
+      shipping_cost: data.shipping_cost,
+      tax: data.tax,
+      total: data.total,
+      status: data.status || 'pending',
+      payment_status: data.payment_status || 'pending',
+      payment_method: data.payment_method,
+      payment_id: data.payment_id,
+      stripe_payment_intent_id: data.stripe_payment_intent_id,
+      shipping_address: data.shipping_address as any,
+      billing_address: data.billing_address as any,
+      notes: data.notes,
+      coupon_code: data.coupon_code,
+    }, data.items);
     res.status(201).json({ success: true, data: order });
   } catch (error) {
     next(error);
@@ -78,10 +92,10 @@ router.post('/payment-intent', authenticate, async (req: AuthRequest, res: Respo
   try {
     const { amount, orderId } = z.object({
       amount: z.number().positive(),
-      orderId: z.string().uuid().optional(),
+      orderId: z.string().optional(),
     }).parse(req.body);
 
-    const paymentIntent = await stripeService.createPaymentIntent(amount, 'usd', {
+    const paymentIntent = await stripeService.createPaymentIntent(amount, 'cop', {
       user_id: req.user!.id,
       order_id: orderId || '',
     });
@@ -97,15 +111,10 @@ router.post('/confirm-payment', authenticate, async (req: AuthRequest, res: Resp
   try {
     const { paymentIntentId, orderId } = z.object({
       paymentIntentId: z.string(),
-      orderId: z.string().uuid(),
+      orderId: z.string().optional(),
     }).parse(req.body);
 
     const payment = await stripeService.confirmPayment(paymentIntentId);
-
-    if (payment.status === 'succeeded') {
-      await orderService.updatePaymentStatus(orderId, 'paid', paymentIntentId);
-      await orderService.updateStatus(orderId, 'confirmed');
-    }
 
     res.json({ success: true, data: payment });
   } catch (error) {

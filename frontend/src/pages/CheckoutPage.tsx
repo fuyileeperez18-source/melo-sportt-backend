@@ -35,10 +35,11 @@ import { Input, Select, Textarea } from '@/components/ui/Input';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { formatCurrency, generateOrderNumber } from '@/lib/utils';
+import { orderService } from '@/lib/services';
 import { cn } from '@/lib/utils';
 
 // Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_demo');
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_51Demo123456789');
 
 // Form schemas
 const shippingSchema = z.object({
@@ -118,12 +119,18 @@ function PaymentForm({
     }
 
     try {
-      // In production, create payment intent on your backend
-      // For demo, we'll simulate a successful payment
-      const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-      });
+      // Create payment intent on backend
+      const { data: paymentIntent } = await orderService.createPaymentIntent(total);
+
+      // Confirm the payment with Stripe
+      const { error: stripeError, paymentIntent: confirmedPayment } = await stripe.confirmCardPayment(
+        paymentIntent.client_secret,
+        {
+          payment_method: {
+            card: cardElement,
+          },
+        }
+      );
 
       if (stripeError) {
         setError(stripeError.message || 'El pago falló');
@@ -131,13 +138,17 @@ function PaymentForm({
         return;
       }
 
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Success
-      onSuccess(paymentMethod?.id || 'demo_payment_id');
-    } catch (err) {
-      setError('El pago falló. Por favor intenta de nuevo.');
+      if (confirmedPayment?.status === 'succeeded') {
+        // Payment successful - save order with real payment intent
+        await orderService.confirmPayment(confirmedPayment.id, paymentIntent.id);
+        onSuccess(confirmedPayment.id);
+      } else {
+        setError('El pago no fue completado. Por favor intenta de nuevo.');
+        setIsProcessing(false);
+      }
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      setError(err.message || 'El pago falló. Por favor intenta de nuevo.');
       setIsProcessing(false);
     }
   };
@@ -184,6 +195,16 @@ function PaymentForm({
         <p className="text-green-400 text-sm">
           Tu pago está protegido con encriptación SSL de 256 bits
         </p>
+      </div>
+
+      {/* Test cards info */}
+      <div className="p-4 bg-primary-800/50 rounded-lg mb-6">
+        <p className="text-xs text-gray-400 mb-2">Tarjetas de prueba:</p>
+        <div className="text-xs text-gray-500 space-y-1">
+          <p>Visa: 4242 4242 4242 4242</p>
+          <p>Mastercard: 5555 5555 5555 4444</p>
+          <p>CVC: 123 | Exp: cualquier fecha futura</p>
+        </div>
       </div>
 
       <div className="flex gap-4">
@@ -258,16 +279,66 @@ export function CheckoutPage() {
     setCurrentStep(1);
   };
 
-  const handlePaymentSuccess = (paymentId: string) => {
+  const handlePaymentSuccess = async (paymentId: string) => {
     const newOrderNumber = generateOrderNumber();
     setOrderNumber(newOrderNumber);
-    setCurrentStep(2);
-    clearCart();
+    setIsProcessing(true);
 
-    // TODO: Save order to Supabase
-    // orderService.create({...})
+    try {
+      // Prepare order data
+      const subtotal = getSubtotal();
+      const selectedShipping = shippingMethods.find((m) => m.id === shippingMethod);
+      const shippingCost = subtotal >= 200000 ? 0 : (selectedShipping?.price || 0);
+      const tax = subtotal * 0.08;
+      const total = subtotal + shippingCost + tax;
 
-    toast.success('¡Pago exitoso!');
+      const orderData = {
+        user_id: user?.id,
+        order_number: newOrderNumber,
+        subtotal,
+        discount: 0,
+        shipping_cost: shippingCost,
+        tax,
+        total,
+        status: 'confirmed' as const,
+        payment_status: 'paid' as const,
+        payment_method: 'card',
+        payment_id: paymentId,
+        stripe_payment_intent_id: paymentId,
+        shipping_address: {
+          email: shippingData?.email,
+          firstName: shippingData?.firstName,
+          lastName: shippingData?.lastName,
+          phone: shippingData?.phone,
+          address: shippingData?.address,
+          apartment: shippingData?.apartment,
+          city: shippingData?.city,
+          state: shippingData?.state,
+          postalCode: shippingData?.postalCode,
+          country: shippingData?.country,
+        },
+        items: items.map((item) => ({
+          product_id: item.product.id,
+          variant_id: item.variant?.id,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+      };
+
+      // Create order in backend (this will also reduce stock)
+      await orderService.create(orderData);
+
+      setCurrentStep(2);
+      clearCart();
+      toast.success('¡Pago exitoso! Tu pedido ha sido confirmado.');
+    } catch (error: any) {
+      console.error('Error saving order:', error);
+      toast.error('El pago fue exitoso pero hubo un error guardando tu pedido. Contacta soporte.');
+      setCurrentStep(2);
+      clearCart();
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -276,7 +347,7 @@ export function CheckoutPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link to="/" className="text-2xl font-bold text-white">
-            MELO SPORTT
+            BORIS
           </Link>
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <Lock className="h-4 w-4" />
