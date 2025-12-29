@@ -219,15 +219,14 @@ export function HomePage() {
                   onClick={() => navigate('/shop')}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-black font-bold rounded-full overflow-hidden border-4 border-white shadow-2xl shadow-black/50 transition-all duration-300 hover:shadow-2xl hover:shadow-white/50 backdrop-blur-sm"
-                  style={{ boxShadow: '0 10px 40px rgba(255,255,255,0.4), 0 0 0 2px rgba(0,0,0,0.8)' }}
+                  className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-black font-bold rounded-full overflow-hidden border-4 border-white shadow-[0_0_40px_rgba(255,255,255,0.8),0_10px_60px_rgba(255,255,255,0.6),0_0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300 hover:shadow-[0_0_60px_rgba(255,255,255,0.9),0_15px_80px_rgba(255,255,255,0.7),0_0_0_4px_rgba(0,0,0,0.9)] backdrop-blur-sm"
                 >
-                  <span className="relative z-10 flex items-center gap-2 text-lg">
+                  <span className="relative z-10 flex items-center gap-2 text-xl">
                     <ShoppingBag className="h-6 w-6" />
                     Comprar Ahora
                     <ArrowRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-white translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-50 via-white to-gray-50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
                 </motion.button>
                 <Button variant="outline" leftIcon={<Play className="h-4 w-4" />}>
                   Ver Lookbook

@@ -103,29 +103,29 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
       {/* Sidebar */}
       <motion.aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-full w-64 bg-gradient-to-b from-gray-900 to-gray-950 border-r border-gray-800 flex flex-col',
+          'fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 flex flex-col shadow-xl',
           'lg:translate-x-0 lg:static',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-800">
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white">
           <Link to="/admin" className="flex items-center gap-2" onClick={onClose}>
-            <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-black">
               MELO SPORTT
             </span>
-            <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded">Admin</span>
+            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded">Admin</span>
           </Link>
           <button
             onClick={onClose}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-800 transition-colors"
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            <X className="h-5 w-5 text-gray-400" />
+            <X className="h-5 w-5 text-gray-600" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto bg-white">
           {sidebarItems.map((item) => {
             const isActive = location.pathname === item.href;
             return (
@@ -136,8 +136,8 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
                   isActive
-                    ? 'bg-white text-gray-900 shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                    ? 'bg-black text-white shadow-lg'
+                    : 'text-gray-600 hover:text-black hover:bg-gray-100'
                 )}
               >
                 <item.icon className="h-5 w-5" />
@@ -145,7 +145,7 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
                 {item.badge && (
                   <span className={cn(
                     'px-2 py-0.5 text-xs font-bold rounded-full',
-                    isActive ? 'bg-gray-900 text-white' : 'bg-red-500 text-white'
+                    isActive ? 'bg-white text-black' : 'bg-red-500 text-white'
                   )}>
                     {item.badge}
                   </span>
@@ -156,13 +156,13 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
         </nav>
 
         {/* User */}
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-4 border-t border-gray-200 bg-white">
           <div className="flex items-center gap-3 mb-3 px-4 py-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-bold">
               {user?.full_name?.[0] || user?.email?.[0] || 'A'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
+              <p className="text-sm font-medium text-black truncate">
                 {user?.full_name || 'Administrador'}
               </p>
               <p className="text-xs text-gray-500 truncate">{user?.email}</p>
@@ -170,7 +170,7 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
           </div>
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-3 w-full px-4 py-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-colors"
+            className="flex items-center gap-3 w-full px-4 py-3 text-gray-600 hover:text-black hover:bg-gray-100 rounded-xl transition-colors"
           >
             <LogOut className="h-5 w-5" />
             <span className="font-medium">Cerrar Sesión</span>
@@ -290,26 +290,26 @@ export function AdminDashboard() {
   const totalOrders = salesOverview.reduce((acc, item) => acc + (item.orders || 0), 0);
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-gray-50 flex">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col">
         {/* Top bar */}
-        <header className="h-16 bg-black/50 backdrop-blur-xl border-b border-gray-800 flex items-center justify-between px-6 sticky top-0 z-30">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl hover:bg-white/10 transition-colors"
+              className="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors"
             >
-              <Menu className="h-5 w-5 text-white" />
+              <Menu className="h-5 w-5 text-gray-800" />
             </button>
             <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar productos, pedidos..."
-                className="w-72 h-11 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all"
+                className="w-72 h-11 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-200 transition-all"
               />
             </div>
           </div>
@@ -318,17 +318,17 @@ export function AdminDashboard() {
             <button
               onClick={fetchData}
               disabled={loading}
-              className="p-2 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50"
+              className="p-2 rounded-xl hover:bg-gray-100 transition-colors disabled:opacity-50"
             >
-              <RefreshCw className={`h-5 w-5 text-white ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-5 w-5 text-gray-800 ${loading ? 'animate-spin' : ''}`} />
             </button>
-            <button className="relative p-2 rounded-xl hover:bg-white/10 transition-colors">
-              <Bell className="h-5 w-5 text-white" />
-              <span className="absolute top-1 right-1 h-2 w-2 bg-white rounded-full" />
+            <button className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors">
+              <Bell className="h-5 w-5 text-gray-800" />
+              <span className="absolute top-1 right-1 h-2 w-2 bg-black rounded-full" />
             </button>
-            <div className="h-8 w-px bg-gray-800" />
+            <div className="h-8 w-px bg-gray-200" />
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-white to-gray-400 rounded-full flex items-center justify-center text-black font-bold text-sm">
+              <div className="w-9 h-9 bg-black rounded-full flex items-center justify-center text-white font-bold text-sm">
                 A
               </div>
               <ChevronDown className="h-4 w-4 text-gray-500" />
@@ -342,18 +342,18 @@ export function AdminDashboard() {
             {loading && !metrics ? (
               <div className="flex items-center justify-center h-96">
                 <div className="text-center">
-                  <RefreshCw className="h-8 w-8 animate-spin text-white mx-auto mb-4" />
-                  <p className="text-gray-400">Cargando estadísticas...</p>
+                  <RefreshCw className="h-8 w-8 animate-spin text-black mx-auto mb-4" />
+                  <p className="text-gray-600">Cargando estadísticas...</p>
                 </div>
               </div>
             ) : error ? (
               <div className="flex items-center justify-center h-96">
                 <div className="text-center">
                   <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
-                  <p className="text-white font-medium mb-2">{error}</p>
+                  <p className="text-black font-medium mb-2">{error}</p>
                   <button
                     onClick={fetchData}
-                    className="px-4 py-2 bg-white text-black rounded-xl hover:bg-gray-200 transition-colors"
+                    className="px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors"
                   >
                     Reintentar
                   </button>
@@ -362,10 +362,10 @@ export function AdminDashboard() {
             ) : (
               <>
                 {/* Page title */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
                   <div>
-                    <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-                    <p className="text-gray-400">Bienvenido de nuevo. Aquí están tus estadísticas en tiempo real.</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-black">Dashboard</h1>
+                    <p className="text-gray-600 mt-1">Bienvenido de nuevo. Aquí están tus estadísticas en tiempo real.</p>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Clock className="h-4 w-4" />
@@ -380,8 +380,8 @@ export function AdminDashboard() {
                     value={metrics?.today_revenue || 0}
                     change={metrics?.revenue_change}
                     icon={DollarSign}
-                    iconColor="text-white"
-                    iconBg="bg-white/10"
+                    iconColor="text-black"
+                    iconBg="bg-gray-100"
                     format="currency"
                     delay={0}
                   />
@@ -390,24 +390,24 @@ export function AdminDashboard() {
                     value={metrics?.today_orders || 0}
                     change={metrics?.orders_change}
                     icon={ShoppingCart}
-                    iconColor="text-white"
-                    iconBg="bg-white/10"
+                    iconColor="text-black"
+                    iconBg="bg-gray-100"
                     delay={0.1}
                   />
                   <StatCard
                     title="Pedidos Pendientes"
                     value={metrics?.pending_orders || 0}
                     icon={Clock}
-                    iconColor="text-white"
-                    iconBg="bg-white/10"
+                    iconColor="text-black"
+                    iconBg="bg-gray-100"
                     delay={0.2}
                   />
                   <StatCard
                     title="Stock Bajo"
                     value={metrics?.low_stock_products || 0}
                     icon={AlertTriangle}
-                    iconColor="text-white"
-                    iconBg="bg-white/10"
+                    iconColor="text-black"
+                    iconBg="bg-gray-100"
                     delay={0.3}
                   />
                 </div>
@@ -418,25 +418,25 @@ export function AdminDashboard() {
                     title="Ingresos Totales"
                     value={formatCurrency(totalRevenue)}
                     icon={DollarSign}
-                    color="white"
+                    color="black"
                   />
                   <MiniStat
                     title="Total Pedidos"
                     value={totalOrders}
                     icon={ShoppingCart}
-                    color="white"
+                    color="black"
                   />
                   <MiniStat
                     title="Nuevos Clientes"
                     value={metrics?.new_customers_today || 0}
                     icon={Users}
-                    color="white"
+                    color="black"
                   />
                   <MiniStat
                     title="Productos Activos"
                     value={topProducts.length}
                     icon={PackageIcon}
-                    color="white"
+                    color="black"
                   />
                 </div>
 
@@ -474,33 +474,33 @@ export function AdminDashboard() {
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+                    className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm"
                   >
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-lg font-semibold text-white">Pedidos Recientes</h2>
+                      <h2 className="text-lg font-semibold text-black">Pedidos Recientes</h2>
                       <Link
                         to="/admin/orders"
-                        className="text-sm text-gray-400 hover:text-white flex items-center gap-1 font-medium transition-colors"
+                        className="text-sm text-gray-600 hover:text-black flex items-center gap-1 font-medium transition-colors"
                       >
                         Ver todos <TrendingUp className="h-4 w-4" />
                       </Link>
                     </div>
                     <div className="space-y-4">
                       {recentOrders.length > 0 ? recentOrders.map((order) => (
-                        <div key={order.id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-white/5">
+                        <div key={order.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-100">
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white font-medium">
+                            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-medium flex-shrink-0">
                               {order.user?.full_name?.[0] || order.user?.email?.[0] || 'C'}
                             </div>
-                            <div>
-                              <p className="font-medium text-white">
+                            <div className="min-w-0">
+                              <p className="font-medium text-black truncate">
                                 {order.user?.full_name || 'Cliente'}
                               </p>
-                              <p className="text-sm text-gray-500">{order.order_number}</p>
+                              <p className="text-sm text-gray-500 truncate">{order.order_number}</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-bold text-white">{formatCurrency(order.total)}</p>
+                          <div className="text-right flex-shrink-0">
+                            <p className="font-bold text-black">{formatCurrency(order.total)}</p>
                             <OrderStatusBadge status={order.status} />
                           </div>
                         </div>
@@ -515,32 +515,32 @@ export function AdminDashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+                    className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm"
                   >
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-lg font-semibold text-white">Productos Más Vendidos</h2>
+                      <h2 className="text-lg font-semibold text-black">Productos Más Vendidos</h2>
                       <Link
                         to="/admin/products"
-                        className="text-sm text-gray-400 hover:text-white flex items-center gap-1 font-medium transition-colors"
+                        className="text-sm text-gray-600 hover:text-black flex items-center gap-1 font-medium transition-colors"
                       >
                         Ver todos <TrendingUp className="h-4 w-4" />
                       </Link>
                     </div>
                     <div className="space-y-4">
                       {topProducts.length > 0 ? topProducts.map((product, index) => (
-                        <div key={product.id} className="flex items-center gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-white/5">
-                          <span className="text-gray-500 font-bold w-6">{index + 1}</span>
+                        <div key={product.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-100">
+                          <span className="text-gray-500 font-bold w-6 flex-shrink-0">{index + 1}</span>
                           <img
                             src={product.images?.[0]?.url || 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=100'}
                             alt={product.name}
-                            className="w-12 h-12 rounded-xl object-cover"
+                            className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-white truncate">{product.name}</p>
+                            <p className="font-medium text-black truncate">{product.name}</p>
                             <p className="text-sm text-gray-500">{product.total_sold || 0} vendidos</p>
                           </div>
-                          <div className="text-right">
-                            <p className="font-bold text-white">{formatCurrency(product.total_revenue || 0)}</p>
+                          <div className="text-right flex-shrink-0">
+                            <p className="font-bold text-black">{formatCurrency(product.total_revenue || 0)}</p>
                             <p className="text-xs text-gray-500">{formatCurrency(product.price)} c/u</p>
                           </div>
                         </div>
