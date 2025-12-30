@@ -2,9 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Instagram,
-  Twitter,
   Facebook,
-  Youtube,
   Mail,
   Phone,
   MapPin,
@@ -44,10 +42,8 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { name: 'Instagram', icon: Instagram, href: 'https://instagram.com' },
-  { name: 'Twitter', icon: Twitter, href: 'https://twitter.com' },
-  { name: 'Facebook', icon: Facebook, href: 'https://facebook.com' },
-  { name: 'Youtube', icon: Youtube, href: 'https://youtube.com' },
+  { name: 'Instagram', icon: Instagram, href: 'https://www.instagram.com/melo_sportt23/' },
+  { name: 'Facebook', icon: Facebook, href: 'https://www.facebook.com/melo.sportt' },
 ];
 
 export function Footer() {
@@ -135,16 +131,41 @@ export function Footer() {
                 contacto@melosportt.com
               </a>
               <a
-                href="tel:+573001234567"
+                href="tel:+573044155473"
                 className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors"
               >
                 <Phone className="h-4 w-4" />
-                +57 300 123 4567
+                +57 304 415 5473
               </a>
               <div className="flex items-start gap-3 text-gray-400">
                 <MapPin className="h-4 w-4 mt-0.5" />
-                <span>Centro Histórico, Calle del Arsenal<br />Cartagena de Indias, Colombia</span>
+                <span>Barrio San Francisco<br />Cartagena de Indias, Colombia</span>
               </div>
+            </div>
+
+            {/* Google Maps embebido */}
+            <div className="mt-6">
+              <a
+                href="https://maps.app.goo.gl/ic9txzVJ1w6stEUHA"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block overflow-hidden rounded-lg border border-primary-700 hover:border-primary-500 transition-colors"
+              >
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3923.246095095958!2d-75.5165212!3d10.437434!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8ef62566056360a1%3A0x6c61684097234a70!2sConjunto%20Residencial%20Portal%20del%20Virrey!5e0!3m2!1ses!2sco!4v1699999999999!5m2!1ses!2sco"
+                  width="100%"
+                  height="150"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Ubicación de MELO SPORTT"
+                />
+              </a>
+              <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                Barrio San Francisco, Cartagena de Indias
+              </p>
             </div>
 
             {/* Social links */}
