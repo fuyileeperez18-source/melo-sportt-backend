@@ -290,7 +290,7 @@ export function AdminDashboard() {
   const totalOrders = salesOverview.reduce((acc, item) => acc + (item.orders || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex">{/* Fondo gris claro para contraste elegante */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main content */}

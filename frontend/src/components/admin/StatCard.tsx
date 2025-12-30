@@ -47,7 +47,7 @@ export function StatCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all duration-300 group"
+      className="bg-white rounded-2xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-300 group"
     >
       <div className="flex items-center justify-between mb-4">
         <div className={`p-3 rounded-xl ${iconBg} group-hover:scale-110 transition-transform duration-300`}>
@@ -57,10 +57,10 @@ export function StatCard({
           <div
             className={`flex items-center gap-1 text-sm font-medium px-2.5 py-1 rounded-full ${
               isPositive
-                ? 'bg-emerald-500/20 text-emerald-400'
+                ? 'bg-green-100 text-green-700'
                 : isNegative
-                ? 'bg-red-500/20 text-red-400'
-                : 'bg-white/10 text-gray-400'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-gray-100 text-gray-600'
             }`}
           >
             {isPositive && (
@@ -78,8 +78,8 @@ export function StatCard({
         )}
       </div>
       <div>
-        <p className="text-sm text-gray-400 font-medium">{title}</p>
-        <p className="text-3xl font-bold text-white mt-1">{formatValue(value)}</p>
+        <p className="text-sm text-gray-600 font-medium">{title}</p>
+        <p className="text-3xl font-bold text-black mt-1">{formatValue(value)}</p>
       </div>
     </motion.div>
   );
@@ -93,12 +93,13 @@ interface MiniStatProps {
 }
 
 const colorClasses = {
-  blue: { bg: 'bg-blue-500/10', icon: 'text-blue-400', dot: 'bg-blue-500' },
-  green: { bg: 'bg-emerald-500/10', icon: 'text-emerald-400', dot: 'bg-emerald-500' },
-  orange: { bg: 'bg-orange-500/10', icon: 'text-orange-400', dot: 'bg-orange-500' },
-  purple: { bg: 'bg-purple-500/10', icon: 'text-purple-400', dot: 'bg-purple-500' },
-  pink: { bg: 'bg-pink-500/10', icon: 'text-pink-400', dot: 'bg-pink-500' },
-  white: { bg: 'bg-white/10', icon: 'text-white', dot: 'bg-white' },
+  blue: { bg: 'bg-gray-50', icon: 'text-black', dot: 'bg-black' },
+  green: { bg: 'bg-gray-50', icon: 'text-black', dot: 'bg-black' },
+  orange: { bg: 'bg-gray-50', icon: 'text-black', dot: 'bg-black' },
+  purple: { bg: 'bg-gray-50', icon: 'text-black', dot: 'bg-black' },
+  pink: { bg: 'bg-gray-50', icon: 'text-black', dot: 'bg-black' },
+  white: { bg: 'bg-gray-50', icon: 'text-black', dot: 'bg-black' },
+  black: { bg: 'bg-gray-50', icon: 'text-black', dot: 'bg-black' },
 };
 
 export function MiniStat({ title, value, icon: Icon, color }: MiniStatProps) {
@@ -107,14 +108,14 @@ export function MiniStat({ title, value, icon: Icon, color }: MiniStatProps) {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className={`flex items-center gap-4 p-4 rounded-xl ${colors.bg} cursor-pointer transition-all duration-200 border border-white/5`}
+      className={`flex items-center gap-4 p-4 rounded-xl ${colors.bg} cursor-pointer transition-all duration-200 border border-gray-200 hover:border-gray-300 hover:shadow-sm bg-white`}
     >
-      <div className={`p-2.5 rounded-lg bg-white/5`}>
+      <div className={`p-2.5 rounded-lg bg-gray-100`}>
         <Icon className={`w-5 h-5 ${colors.icon}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-400 truncate">{title}</p>
-        <p className="text-xl font-bold text-white">{value}</p>
+        <p className="text-sm text-gray-600 truncate font-medium">{title}</p>
+        <p className="text-xl font-bold text-black">{value}</p>
       </div>
       <div className={`w-2 h-2 rounded-full ${colors.dot}`} />
     </motion.div>

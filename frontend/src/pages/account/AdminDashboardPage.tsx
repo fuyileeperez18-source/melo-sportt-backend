@@ -153,44 +153,44 @@ export function AdminDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg">Cargando panel de administración...</p>
+          <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-black text-lg font-medium">Cargando panel de administración...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gray-50">{/* Fondo gris claro para elegancia */}
       {/* Header */}
-      <header className="bg-black/50 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-10">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Panel de Administración</h1>
-                <p className="text-gray-400">Bienvenido, {profile?.full_name}</p>
+                <h1 className="text-2xl font-bold text-black">Panel de Administración</h1>
+                <p className="text-gray-600">Bienvenido, {profile?.full_name}</p>
                 {/* Debug Info */}
-                <div className="text-xs text-yellow-400 mt-1">
+                <div className="text-xs text-gray-500 mt-1">
                   Rol: {profile?.role} | Email: {profile?.email}
                   {profile?.role !== 'admin' && profile?.role !== 'super_admin' && (
-                    <span className="text-red-400 ml-2">⚠️ Este usuario NO tiene permisos de admin</span>
+                    <span className="text-red-600 ml-2">⚠️ Este usuario NO tiene permisos de admin</span>
                   )}
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <button className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
+              <button className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition-colors">
                 <Bell className="w-5 h-5" />
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-2 px-4 py-2 text-red-400 hover:text-white hover:bg-red-500/10 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-white hover:bg-red-600 rounded-lg transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Cerrar Sesión</span>
@@ -203,79 +203,79 @@ export function AdminDashboardPage() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-xl p-6">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-blue-500/20 rounded-lg">
-                <DollarSign className="w-6 h-6 text-blue-400" />
+              <div className="p-3 bg-gray-100 rounded-lg">
+                <DollarSign className="w-6 h-6 text-black" />
               </div>
-              <TrendingUp className="w-5 h-5 text-green-400" />
+              <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
-            <h3 className="text-gray-400 text-sm mb-1">Ingresos Totales</h3>
-            <p className="text-2xl font-bold text-white">{formatCurrency(stats.totalRevenue)}</p>
+            <h3 className="text-gray-600 text-sm mb-1 font-medium">Ingresos Totales</h3>
+            <p className="text-2xl font-bold text-black">{formatCurrency(stats.totalRevenue)}</p>
           </div>
 
-          <div className="bg-gradient-to-r from-green-500/10 to-green-600/10 border border-green-500/20 rounded-xl p-6">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-green-500/20 rounded-lg">
-                <ShoppingCart className="w-6 h-6 text-green-400" />
+              <div className="p-3 bg-gray-100 rounded-lg">
+                <ShoppingCart className="w-6 h-6 text-black" />
               </div>
               {stats.pendingOrders > 0 && (
-                <span className="px-2 py-1 bg-orange-500/20 text-orange-400 text-xs rounded-full">
+                <span className="px-2 py-1 bg-black text-white text-xs rounded-full font-medium">
                   {stats.pendingOrders} pendientes
                 </span>
               )}
             </div>
-            <h3 className="text-gray-400 text-sm mb-1">Total Pedidos</h3>
-            <p className="text-2xl font-bold text-white">{stats.totalOrders}</p>
+            <h3 className="text-gray-600 text-sm mb-1 font-medium">Total Pedidos</h3>
+            <p className="text-2xl font-bold text-black">{stats.totalOrders}</p>
           </div>
 
-          <div className="bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-xl p-6">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-purple-500/20 rounded-lg">
-                <Package className="w-6 h-6 text-purple-400" />
+              <div className="p-3 bg-gray-100 rounded-lg">
+                <Package className="w-6 h-6 text-black" />
               </div>
               {stats.lowStockProducts > 0 && (
-                <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded-full">
+                <span className="px-2 py-1 bg-red-600 text-white text-xs rounded-full font-medium">
                   {stats.lowStockProducts} bajo stock
                 </span>
               )}
             </div>
-            <h3 className="text-gray-400 text-sm mb-1">Productos</h3>
-            <p className="text-2xl font-bold text-white">{stats.totalProducts}</p>
+            <h3 className="text-gray-600 text-sm mb-1 font-medium">Productos</h3>
+            <p className="text-2xl font-bold text-black">{stats.totalProducts}</p>
           </div>
 
-          <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 border border-orange-500/20 rounded-xl p-6">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-orange-500/20 rounded-lg">
-                <Users className="w-6 h-6 text-orange-400" />
+              <div className="p-3 bg-gray-100 rounded-lg">
+                <Users className="w-6 h-6 text-black" />
               </div>
             </div>
-            <h3 className="text-gray-400 text-sm mb-1">Clientes</h3>
-            <p className="text-2xl font-bold text-white">{stats.totalCustomers}</p>
+            <h3 className="text-gray-600 text-sm mb-1 font-medium">Clientes</h3>
+            <p className="text-2xl font-bold text-black">{stats.totalCustomers}</p>
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-white mb-4">Acciones Rápidas</h2>
+          <h2 className="text-xl font-bold text-black mb-4">Acciones Rápidas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action) => (
               <Link
                 key={action.title}
                 to={action.href}
-                className={`${action.color} border border-current/20 rounded-xl p-6 hover:scale-105 transition-all duration-200 block group`}
+                className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-black hover:shadow-lg transition-all duration-200 block group"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <action.icon className="w-8 h-8" />
+                  <action.icon className="w-8 h-8 text-black" />
                   {action.badge && (
-                    <span className="px-2 py-1 bg-current/30 text-current text-xs rounded-full">
+                    <span className="px-2 py-1 bg-black text-white text-xs rounded-full font-medium">
                       {action.badge}
                     </span>
                   )}
                 </div>
-                <h3 className="font-semibold text-white mb-1">{action.title}</h3>
-                <p className="text-current/70 text-sm">{action.description}</p>
-                <ChevronRight className="w-4 h-4 text-current/50 group-hover:text-current mt-2" />
+                <h3 className="font-semibold text-black mb-1">{action.title}</h3>
+                <p className="text-gray-600 text-sm">{action.description}</p>
+                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-black mt-2 transition-colors" />
               </Link>
             ))}
           </div>
@@ -284,30 +284,30 @@ export function AdminDashboardPage() {
         {/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Orders */}
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-gray-800 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <Truck className="w-5 h-5 text-blue-400" />
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-black flex items-center gap-2">
+                <Truck className="w-5 h-5 text-black" />
                 Pedidos Recientes
               </h3>
               <Link
                 to="/admin/orders"
-                className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                className="text-gray-600 hover:text-black text-sm flex items-center gap-1 font-medium transition-colors"
               >
                 Ver todos <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-gray-200">
               {recentOrders.length > 0 ? (
                 recentOrders.map((order) => (
-                  <div key={order.id} className="p-4 hover:bg-gray-800/30 transition-colors">
+                  <div key={order.id} className="p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-medium">#{order.order_number}</span>
+                      <span className="text-black font-medium">#{order.order_number}</span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        order.status === 'delivered' ? 'bg-green-500/20 text-green-400' :
-                        order.status === 'shipped' ? 'bg-blue-500/20 text-blue-400' :
-                        order.status === 'processing' ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-gray-500/20 text-gray-400'
+                        order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                        order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                        order.status === 'processing' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-gray-100 text-gray-700'
                       }`}>
                         {order.status === 'delivered' ? 'Entregado' :
                          order.status === 'shipped' ? 'Enviado' :
@@ -317,15 +317,15 @@ export function AdminDashboardPage() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400">
+                      <span className="text-gray-600">
                         {new Date(order.created_at).toLocaleDateString('es-ES')}
                       </span>
-                      <span className="text-white font-medium">{formatCurrency(order.total)}</span>
+                      <span className="text-black font-medium">{formatCurrency(order.total)}</span>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-gray-400">
+                <div className="p-8 text-center text-gray-500">
                   <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>No hay pedidos recientes</p>
                 </div>
@@ -334,46 +334,46 @@ export function AdminDashboardPage() {
           </div>
 
           {/* Recent Products */}
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-gray-800 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <Package className="w-5 h-5 text-green-400" />
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-black flex items-center gap-2">
+                <Package className="w-5 h-5 text-black" />
                 Productos Recientes
               </h3>
               <Link
                 to="/admin/products"
-                className="text-green-400 hover:text-green-300 text-sm flex items-center gap-1"
+                className="text-gray-600 hover:text-black text-sm flex items-center gap-1 font-medium transition-colors"
               >
                 Ver todos <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-gray-200">
               {recentProducts.length > 0 ? (
                 recentProducts.map((product) => (
-                  <div key={product.id} className="p-4 hover:bg-gray-800/30 transition-colors">
+                  <div key={product.id} className="p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center gap-3 mb-2">
                       <img
                         src={product.images?.[0]?.url || 'https://via.placeholder.com/40'}
                         alt={product.name}
-                        className="w-10 h-10 rounded-lg object-cover"
+                        className="w-10 h-10 rounded-lg object-cover border border-gray-200"
                       />
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-white font-medium truncate">{product.name}</h4>
-                        <p className="text-gray-400 text-sm">SKU: {product.sku}</p>
+                        <h4 className="text-black font-medium truncate">{product.name}</h4>
+                        <p className="text-gray-600 text-sm">SKU: {product.sku}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-white font-medium">{formatCurrency(product.price)}</span>
+                      <span className="text-black font-medium">{formatCurrency(product.price)}</span>
                       <div className="flex items-center gap-2">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          product.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          product.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                         }`}>
                           {product.is_active ? 'Activo' : 'Inactivo'}
                         </span>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          product.quantity > 10 ? 'bg-green-500/20 text-green-400' :
-                          product.quantity > 0 ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-red-500/20 text-red-400'
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          product.quantity > 10 ? 'bg-green-100 text-green-700' :
+                          product.quantity > 0 ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-red-100 text-red-700'
                         }`}>
                           Stock: {product.quantity}
                         </span>
@@ -382,7 +382,7 @@ export function AdminDashboardPage() {
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-gray-400">
+                <div className="p-8 text-center text-gray-500">
                   <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>No hay productos recientes</p>
                 </div>
@@ -392,50 +392,50 @@ export function AdminDashboardPage() {
         </div>
 
         {/* Admin Navigation */}
-        <div className="mt-8 bg-gray-900/50 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Navegación Rápida</h3>
+        <div className="mt-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-black mb-4">Navegación Rápida</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <Link
               to="/admin/products"
-              className="flex flex-col items-center p-4 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors group"
+              className="flex flex-col items-center p-4 bg-gray-50 hover:bg-black hover:text-white rounded-lg transition-all group border border-gray-200"
             >
-              <Package className="w-8 h-8 text-blue-400 group-hover:text-blue-300 mb-2" />
-              <span className="text-gray-300 group-hover:text-white text-sm font-medium">Productos</span>
+              <Package className="w-8 h-8 text-black group-hover:text-white mb-2 transition-colors" />
+              <span className="text-gray-700 group-hover:text-white text-sm font-medium transition-colors">Productos</span>
             </Link>
             <Link
               to="/admin/orders"
-              className="flex flex-col items-center p-4 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors group"
+              className="flex flex-col items-center p-4 bg-gray-50 hover:bg-black hover:text-white rounded-lg transition-all group border border-gray-200"
             >
-              <ShoppingCart className="w-8 h-8 text-orange-400 group-hover:text-orange-300 mb-2" />
-              <span className="text-gray-300 group-hover:text-white text-sm font-medium">Pedidos</span>
+              <ShoppingCart className="w-8 h-8 text-black group-hover:text-white mb-2 transition-colors" />
+              <span className="text-gray-700 group-hover:text-white text-sm font-medium transition-colors">Pedidos</span>
             </Link>
             <Link
               to="/admin/customers"
-              className="flex flex-col items-center p-4 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors group"
+              className="flex flex-col items-center p-4 bg-gray-50 hover:bg-black hover:text-white rounded-lg transition-all group border border-gray-200"
             >
-              <Users className="w-8 h-8 text-green-400 group-hover:text-green-300 mb-2" />
-              <span className="text-gray-300 group-hover:text-white text-sm font-medium">Clientes</span>
+              <Users className="w-8 h-8 text-black group-hover:text-white mb-2 transition-colors" />
+              <span className="text-gray-700 group-hover:text-white text-sm font-medium transition-colors">Clientes</span>
             </Link>
             <Link
               to="/admin/analytics"
-              className="flex flex-col items-center p-4 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors group"
+              className="flex flex-col items-center p-4 bg-gray-50 hover:bg-black hover:text-white rounded-lg transition-all group border border-gray-200"
             >
-              <BarChart3 className="w-8 h-8 text-purple-400 group-hover:text-purple-300 mb-2" />
-              <span className="text-gray-300 group-hover:text-white text-sm font-medium">Analytics</span>
+              <BarChart3 className="w-8 h-8 text-black group-hover:text-white mb-2 transition-colors" />
+              <span className="text-gray-700 group-hover:text-white text-sm font-medium transition-colors">Analytics</span>
             </Link>
             <Link
               to="/admin/settings"
-              className="flex flex-col items-center p-4 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors group"
+              className="flex flex-col items-center p-4 bg-gray-50 hover:bg-black hover:text-white rounded-lg transition-all group border border-gray-200"
             >
-              <Settings className="w-8 h-8 text-gray-400 group-hover:text-gray-300 mb-2" />
-              <span className="text-gray-300 group-hover:text-white text-sm font-medium">Ajustes</span>
+              <Settings className="w-8 h-8 text-black group-hover:text-white mb-2 transition-colors" />
+              <span className="text-gray-700 group-hover:text-white text-sm font-medium transition-colors">Ajustes</span>
             </Link>
             <Link
               to="/shop"
-              className="flex flex-col items-center p-4 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors group"
+              className="flex flex-col items-center p-4 bg-gray-50 hover:bg-black hover:text-white rounded-lg transition-all group border border-gray-200"
             >
-              <Store className="w-8 h-8 text-pink-400 group-hover:text-pink-300 mb-2" />
-              <span className="text-gray-300 group-hover:text-white text-sm font-medium">Tienda</span>
+              <Store className="w-8 h-8 text-black group-hover:text-white mb-2 transition-colors" />
+              <span className="text-gray-700 group-hover:text-white text-sm font-medium transition-colors">Tienda</span>
             </Link>
           </div>
         </div>
