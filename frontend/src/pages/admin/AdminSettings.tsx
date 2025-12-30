@@ -61,22 +61,22 @@ export function AdminSettings() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Settings</h1>
-          <p className="text-gray-400">Manage your store configuration</p>
+          <h1 className="text-2xl font-bold text-black">Ajustes</h1>
+          <p className="text-gray-600">Administra la configuración de tu tienda</p>
         </div>
         <Button
           onClick={handleSave}
           isLoading={isSaving}
           leftIcon={<Save className="h-4 w-4" />}
         >
-          Save Changes
+          Guardar Cambios
         </Button>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Sidebar */}
         <div className="lg:w-64 flex-shrink-0">
-          <nav className="bg-primary-900 rounded-xl border border-primary-800 p-2">
+          <nav className="bg-white rounded-xl border border-gray-200 p-2 shadow-sm">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -84,8 +84,8 @@ export function AdminSettings() {
                 className={cn(
                   'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left',
                   activeTab === tab.id
-                    ? 'bg-white text-black'
-                    : 'text-gray-400 hover:text-white hover:bg-primary-800'
+                    ? 'bg-black text-white'
+                    : 'text-gray-700 hover:text-black hover:bg-gray-100'
                 )}
               >
                 <tab.icon className="h-5 w-5" />
@@ -101,19 +101,19 @@ export function AdminSettings() {
             key={activeTab}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-primary-900 rounded-xl border border-primary-800 p-6"
+            className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
           >
             {/* General Settings */}
             {activeTab === 'general' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-white mb-6">General Settings</h2>
+                <h2 className="text-xl font-semibold text-black mb-6">Configuración General</h2>
 
                 {/* Store logo */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">Store Logo</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Logo de la Tienda</label>
                   <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 bg-primary-800 rounded-xl flex items-center justify-center">
-                      <span className="text-3xl font-bold text-white">W</span>
+                    <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center border border-gray-200">
+                      <span className="text-3xl font-bold text-black">M</span>
                     </div>
                     <Button variant="outline" leftIcon={<Upload className="h-4 w-4" />}>
                       Upload New
@@ -148,23 +148,23 @@ export function AdminSettings() {
             {/* Notifications */}
             {activeTab === 'notifications' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-white mb-6">Notification Settings</h2>
+                <h2 className="text-xl font-semibold text-black mb-6">Configuración de Notificaciones</h2>
 
                 <div className="space-y-4">
                   {[
-                    { label: 'New order notifications', description: 'Receive email when a new order is placed', icon: Mail },
-                    { label: 'Low stock alerts', description: 'Get notified when products are running low', icon: Bell },
-                    { label: 'Customer messages', description: 'Receive notifications for new messages', icon: Smartphone },
-                    { label: 'Review notifications', description: 'Get notified when customers leave reviews', icon: Bell },
+                    { label: 'Notificaciones de nuevos pedidos', description: 'Recibe email cuando se realiza un nuevo pedido', icon: Mail },
+                    { label: 'Alertas de stock bajo', description: 'Recibe notificaciones cuando los productos tengan poco stock', icon: Bell },
+                    { label: 'Mensajes de clientes', description: 'Recibe notificaciones de nuevos mensajes', icon: Smartphone },
+                    { label: 'Notificaciones de reseñas', description: 'Recibe notificaciones cuando los clientes dejen reseñas', icon: Bell },
                   ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between p-4 bg-primary-800 rounded-lg">
+                    <div key={item.label} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
                       <div className="flex items-center gap-4">
-                        <div className="p-2 bg-primary-700 rounded-lg">
-                          <item.icon className="h-5 w-5 text-gray-400" />
+                        <div className="p-2 bg-gray-100 rounded-lg">
+                          <item.icon className="h-5 w-5 text-gray-600" />
                         </div>
                         <div>
-                          <p className="text-white font-medium">{item.label}</p>
-                          <p className="text-gray-400 text-sm">{item.description}</p>
+                          <p className="text-black font-medium">{item.label}</p>
+                          <p className="text-gray-600 text-sm">{item.description}</p>
                         </div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -187,19 +187,19 @@ export function AdminSettings() {
             {/* Payments */}
             {activeTab === 'payments' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-white mb-6">Payment Settings</h2>
+                <h2 className="text-xl font-semibold text-black mb-6">Configuración de Pagos</h2>
 
                 {/* Stripe */}
-                <div className="p-4 bg-primary-800 rounded-lg">
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-[#635BFF] rounded-lg">
                         <CreditCard className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-white font-medium">Stripe</p>
-                        <p className="text-green-400 text-sm flex items-center gap-1">
-                          <Check className="h-3 w-3" /> Connected
+                        <p className="text-black font-medium">Stripe</p>
+                        <p className="text-green-600 text-sm flex items-center gap-1">
+                          <Check className="h-3 w-3" /> Conectado
                         </p>
                       </div>
                     </div>

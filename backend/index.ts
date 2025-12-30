@@ -1,4 +1,5 @@
 import express from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -8,8 +9,10 @@ import { env } from './config/env.js';
 import { pool, query } from './config/database.js';
 import routes from './routes/index.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
+import { initializeWebSocket } from './services/websocket.service.js';
 
 const app = express();
+const httpServer = createServer(app);
 
 // Trust proxy for Render/Vercel (required for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
@@ -180,12 +183,16 @@ const PORT = parseInt(env.PORT);
   await runAutoMigrations();
   await runAutoSeed();
 
-  app.listen(PORT, () => {
+  // Initialize WebSocket
+  initializeWebSocket(httpServer);
+
+  httpServer.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`🌍 Environment: ${env.NODE_ENV}`);
     console.log(`🔗 Frontend URL: ${env.FRONTEND_URL}`);
     console.log(`📊 Database: Connected`);
     console.log(`🔄 Auto-migrations: Enabled`);
+    console.log(`💬 WebSocket: Initialized`);
   });
 })();
 

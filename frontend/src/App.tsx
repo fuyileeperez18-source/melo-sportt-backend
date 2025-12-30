@@ -24,6 +24,8 @@ import { AdminProducts } from '@/pages/admin/AdminProducts';
 import { AdminCustomers } from '@/pages/admin/AdminCustomers';
 import { AdminAnalytics } from '@/pages/admin/AdminAnalytics';
 import { AdminSettings } from '@/pages/admin/AdminSettings';
+import { AdminMessages } from '@/pages/admin/AdminMessages';
+import { AdminCoupons } from '@/pages/admin/AdminCoupons';
 import { DebugPage } from '@/pages/DebugPage';
 
 // Account Pages
@@ -37,9 +39,13 @@ import {
   TeamManagementPage,
   CommissionsManagementPage
 } from '@/pages/account';
+import { MessagesPage } from '@/pages/account/MessagesPage';
 
 // Stores
 import { useAuthStore } from '@/stores/authStore';
+
+// Contexts
+import { SocketProvider } from '@/contexts/SocketContext';
 
 // Styles
 import './index.css';
@@ -124,8 +130,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
+      <SocketProvider>
+        <BrowserRouter>
+          <Routes>
           {/* Public routes with main layout */}
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
@@ -161,8 +168,8 @@ function App() {
             <Route path="products" element={<AdminProducts />} />
             <Route path="customers" element={<AdminCustomers />} />
             <Route path="analytics" element={<AdminAnalytics />} />
-            <Route path="messages" element={<div className="text-white">Messages</div>} />
-            <Route path="coupons" element={<div className="text-white">Coupons</div>} />
+            <Route path="messages" element={<AdminMessages />} />
+            <Route path="coupons" element={<AdminCoupons />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
 
@@ -213,6 +220,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <div className="min-h-screen bg-black py-20 text-center text-white">Notificaciones</div>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/account/messages"
+              element={
+                <ProtectedRoute>
+                  <MessagesPage />
                 </ProtectedRoute>
               }
             />
@@ -308,7 +323,8 @@ function App() {
             },
           }}
         />
-      </BrowserRouter>
+        </BrowserRouter>
+      </SocketProvider>
     </QueryClientProvider>
   );
 }
