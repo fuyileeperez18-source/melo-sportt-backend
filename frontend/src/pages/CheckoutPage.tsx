@@ -125,7 +125,7 @@ function PaymentForm({
 
     try {
       // Create payment intent on backend
-      const { data: paymentIntent } = await orderService.createPaymentIntent(total);
+      const paymentIntent = await orderService.createPaymentIntent(total);
 
       // Confirm the payment with Stripe
       const { error: stripeError, paymentIntent: confirmedPayment } = await stripe.confirmCardPayment(
@@ -328,7 +328,7 @@ export function CheckoutPage() {
           quantity: item.quantity,
           price: item.price,
         })),
-      };
+      } as any;
 
       // Create order in backend (this will also reduce stock)
       await orderService.create(orderData);

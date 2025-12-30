@@ -270,12 +270,12 @@ export const orderService = {
     return response.data!;
   },
 
-  async createPaymentIntent(amount: number, orderId?: string) {
+  async createPaymentIntent(amount: number, orderId?: string): Promise<{ id: string; client_secret: string; amount: number; currency: string; status: string }> {
     const response = await api.post<{ id: string; client_secret: string; amount: number; currency: string; status: string }>('/orders/payment-intent', { amount, orderId });
     return response.data!;
   },
 
-  async confirmPayment(paymentIntentId: string, orderId: string) {
+  async confirmPayment(paymentIntentId: string, orderId: string): Promise<any> {
     const response = await api.post('/orders/confirm-payment', { paymentIntentId, orderId });
     return response.data;
   },

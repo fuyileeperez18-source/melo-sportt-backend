@@ -89,7 +89,7 @@ interface MiniStatProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  color: 'blue' | 'green' | 'orange' | 'purple' | 'pink' | 'white';
+  color: 'blue' | 'green' | 'orange' | 'purple' | 'pink' | 'white' | 'black';
 }
 
 const colorClasses = {
