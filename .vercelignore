@@ -4,7 +4,5 @@ migrations/
 *.md
 railway.json
 Procfile
-tsconfig.json
-RENDER_SETUP.md
-README-MIGRATIONS.md
-SISTEMA-PAGOS-SIMULADO.md
+# Only ignore root tsconfig.json (backend), not frontend tsconfig files
+/tsconfig.json
