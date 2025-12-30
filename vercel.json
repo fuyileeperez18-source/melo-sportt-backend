@@ -4,7 +4,10 @@
   "builds": [
     {
       "src": "api/index.ts",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["backend/**"]
+      }
     }
   ],
   "routes": [
@@ -12,8 +15,5 @@
       "src": "/(.*)",
       "dest": "api/index.ts"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
