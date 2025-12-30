@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../stores/authStore';
-import { Message } from '../services/message.service';
+import type { Message } from '../services/message.service';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -44,7 +44,8 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
-  const { token, user } = useAuthStore();
+  const { user } = useAuthStore();
+  const token = localStorage.getItem('melo_sportt_token');
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const newMessageCallbacksRef = useRef<((message: Message) => void)[]>([]);

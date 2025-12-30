@@ -84,9 +84,9 @@ export function MessagesPage() {
     });
 
     return () => {
-      if (unsubscribeNew) unsubscribeNew();
-      if (unsubscribeEdited) unsubscribeEdited();
-      if (unsubscribeDeleted) unsubscribeDeleted();
+      unsubscribeNew();
+      unsubscribeEdited();
+      unsubscribeDeleted();
     };
   }, [isConnected, selectedConversation, user, onNewMessage, onMessageEdited, onMessageDeleted]);
 

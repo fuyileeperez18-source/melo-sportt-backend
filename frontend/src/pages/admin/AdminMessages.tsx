@@ -85,9 +85,9 @@ export function AdminMessages() {
     });
 
     return () => {
-      if (unsubscribeNew) unsubscribeNew();
-      if (unsubscribeEdited) unsubscribeEdited();
-      if (unsubscribeDeleted) unsubscribeDeleted();
+      unsubscribeNew();
+      unsubscribeEdited();
+      unsubscribeDeleted();
     };
   }, [isConnected, selectedConversation, onNewMessage, onMessageEdited, onMessageDeleted]);
 
