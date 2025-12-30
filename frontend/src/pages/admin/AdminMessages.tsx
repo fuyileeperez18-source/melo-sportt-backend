@@ -82,7 +82,7 @@ export function AdminMessages() {
       }
 
       loadConversations();
-    };
+    });
 
     return () => {
       unsubscribeNew();
