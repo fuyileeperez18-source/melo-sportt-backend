@@ -41,51 +41,51 @@ export function RevenueChart({ data, title = 'Ingresos' }: RevenueChartProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+      className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm"
     >
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
+          <h3 className="text-lg font-semibold text-black">{title}</h3>
           <p className="text-sm text-gray-500">Últimos 30 días</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-white" />
-            <span className="text-sm text-gray-400">Ingresos</span>
+            <div className="w-3 h-3 rounded-full bg-black" />
+            <span className="text-sm text-gray-600">Ingresos</span>
           </div>
         </div>
       </div>
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-72 min-h-[288px]">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={288}>
           <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ffffff" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#ffffff" stopOpacity={0} />
+                <stop offset="5%" stopColor="#000000" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#000000" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
             <XAxis
               dataKey="date"
               tickFormatter={formatDate}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#666', fontSize: 12 }}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
               dy={10}
             />
             <YAxis
               tickFormatter={formatCurrency}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#666', fontSize: 12 }}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
               dx={-10}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#000',
-                border: '1px solid #333',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e5e7eb',
                 borderRadius: '12px',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               }}
               formatter={(value: number | undefined) => [
                 new Intl.NumberFormat('es-CO', {
@@ -100,8 +100,8 @@ export function RevenueChart({ data, title = 'Ingresos' }: RevenueChartProps) {
             <Area
               type="monotone"
               dataKey="revenue"
-              stroke="#ffffff"
-              strokeWidth={3}
+              stroke="#000000"
+              strokeWidth={2}
               fill="url(#revenueGradient)"
             />
           </AreaChart>
@@ -149,15 +149,15 @@ export function OrdersChart({ data }: OrdersChartProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+      className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm"
     >
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-white">Pedidos por Estado</h3>
+        <h3 className="text-lg font-semibold text-black">Pedidos por Estado</h3>
         <p className="text-sm text-gray-500">{total} pedidos en total</p>
       </div>
       <div className="flex items-center justify-between">
-        <div className="w-48 h-48">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="w-48 h-48 min-h-[192px] min-w-[192px]">
+          <ResponsiveContainer width="100%" height="100%" minWidth={192} minHeight={192}>
             <PieChart>
               <Pie
                 data={chartData}
@@ -175,10 +175,10 @@ export function OrdersChart({ data }: OrdersChartProps) {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#000',
-                  border: '1px solid #333',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e5e7eb',
                   borderRadius: '12px',
-                  boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 }}
                 formatter={(value: number | undefined, name: string | undefined) => [
                   `${value || 0} pedidos`,
@@ -195,17 +195,17 @@ export function OrdersChart({ data }: OrdersChartProps) {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-white/5"
+              className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-100"
             >
               <div className="flex items-center gap-3">
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-sm font-medium text-gray-300">{item.name}</span>
+                <span className="text-sm font-medium text-gray-700">{item.name}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white">{item.value}</span>
+                <span className="text-sm font-bold text-black">{item.value}</span>
                 <span className="text-xs text-gray-500">({item.percentage}%)</span>
               </div>
             </motion.div>
@@ -240,41 +240,41 @@ export function CategoryChart({ data }: CategoryChartProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+      className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm"
     >
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-white">Ventas por Categoría</h3>
+        <h3 className="text-lg font-semibold text-black">Ventas por Categoría</h3>
         <p className="text-sm text-gray-500">Rendimiento de cada categoría</p>
       </div>
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-72 min-h-[288px]">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={288}>
           <BarChart
             data={data}
             layout="vertical"
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#333" />
+            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e5e7eb" />
             <XAxis
               type="number"
               tickFormatter={formatCurrency}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#666', fontSize: 12 }}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
             />
             <YAxis
               type="category"
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#999', fontSize: 12 }}
+              tick={{ fill: '#374151', fontSize: 12 }}
               width={100}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#000',
-                border: '1px solid #333',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e5e7eb',
                 borderRadius: '12px',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               }}
               formatter={(value: number | undefined) => [
                 new Intl.NumberFormat('es-CO', {
@@ -288,12 +288,12 @@ export function CategoryChart({ data }: CategoryChartProps) {
             <Bar
               dataKey="revenue"
               fill="url(#categoryGradient)"
-              radius={[0, 4, 4, 0]}
+              radius={[0, 8, 8, 0]}
             />
             <defs>
               <linearGradient id="categoryGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#ffffff" />
-                <stop offset="100%" stopColor="#888888" />
+                <stop offset="0%" stopColor="#000000" />
+                <stop offset="100%" stopColor="#4b5563" />
               </linearGradient>
             </defs>
           </BarChart>
@@ -327,45 +327,45 @@ export function MonthlyChart({ data }: MonthlyChartProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+      className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm"
     >
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-white">Ingresos Mensuales</h3>
+        <h3 className="text-lg font-semibold text-black">Ingresos Mensuales</h3>
         <p className="text-sm text-gray-500">Comparativa de los últimos 12 meses</p>
       </div>
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-72 min-h-[288px]">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={288}>
           <AreaChart
             data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
             <defs>
               <linearGradient id="monthlyGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ffffff" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#ffffff" stopOpacity={0} />
+                <stop offset="5%" stopColor="#000000" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#000000" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
             <XAxis
               dataKey="month_label"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#666', fontSize: 11 }}
+              tick={{ fill: '#6b7280', fontSize: 11 }}
               dy={10}
             />
             <YAxis
               tickFormatter={formatCurrency}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#666', fontSize: 12 }}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
               dx={-10}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#000',
-                border: '1px solid #333',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e5e7eb',
                 borderRadius: '12px',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               }}
               formatter={(value: number | undefined, name: string | undefined) => [
                 new Intl.NumberFormat('es-CO', {
@@ -381,8 +381,8 @@ export function MonthlyChart({ data }: MonthlyChartProps) {
               type="monotone"
               dataKey="revenue"
               name="Ingresos"
-              stroke="#ffffff"
-              strokeWidth={3}
+              stroke="#000000"
+              strokeWidth={2}
               fill="url(#monthlyGradient)"
             />
           </AreaChart>
@@ -430,10 +430,10 @@ export function GenderChart({ data }: GenderChartProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10"
+      className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm"
     >
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-white">Ventas por Género</h3>
+        <h3 className="text-lg font-semibold text-black">Ventas por Género</h3>
         <p className="text-sm text-gray-500">Distribución por categoría de género</p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -444,20 +444,20 @@ export function GenderChart({ data }: GenderChartProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 }}
             whileHover={{ scale: 1.05 }}
-            className="p-4 rounded-xl text-center cursor-pointer transition-all bg-white/5 border border-white/5 hover:bg-white/10"
+            className="p-4 rounded-xl text-center cursor-pointer transition-all bg-gray-50 border border-gray-100 hover:bg-gray-100 hover:shadow-md"
           >
             <div
               className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: GENDER_COLORS[item.gender] || '#333' }}
+              style={{ backgroundColor: GENDER_COLORS[item.gender] || '#6b7280' }}
             >
-              <span className="text-black font-bold text-lg">
+              <span className="text-white font-bold text-lg">
                 {GENDER_LABELS[item.gender]?.[0] || '?'}
               </span>
             </div>
-            <p className="text-sm font-medium text-white mb-1">
+            <p className="text-sm font-medium text-black mb-1">
               {GENDER_LABELS[item.gender] || item.gender}
             </p>
-            <p className="text-lg font-bold text-white">{formatCurrency(item.revenue)}</p>
+            <p className="text-lg font-bold text-black">{formatCurrency(item.revenue)}</p>
             <p className="text-xs text-gray-500">{item.items_sold} vendidos</p>
           </motion.div>
         ))}

@@ -14,8 +14,16 @@ interface RealtimeOptions {
 // Cache para canales activos
 const activeChannels = new Map<string, RealtimeChannel>();
 
+// Detectar si Supabase está en modo demo/sin configurar
+const isSupabaseConfigured = () => {
+  const url = import.meta.env.VITE_SUPABASE_URL || '';
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  return url && key && !url.includes('demo.supabase.co') && key !== 'demo-key';
+};
+
 /**
  * Hook para suscribirse a cambios en tiempo real en una tabla
+ * Se desactiva automáticamente si Supabase no está configurado
  */
 export function useRealtimeSubscription(options: RealtimeOptions) {
   const { table, event = '*', filter, onChange } = options;
@@ -24,6 +32,12 @@ export function useRealtimeSubscription(options: RealtimeOptions) {
   const channelKey = `${table}-${event}-${filter?.column || 'all'}-${filter?.value || 'all'}`;
 
   useEffect(() => {
+    // No intentar conectar si Supabase no está configurado
+    if (!isSupabaseConfigured()) {
+      console.log(`[Realtime] Deshabilitado - Supabase en modo demo`);
+      return;
+    }
+
     // Verificar si ya existe un canal para esta combinación
     if (activeChannels.has(channelKey)) {
       channelRef.current = activeChannels.get(channelKey)!;
@@ -36,9 +50,14 @@ export function useRealtimeSubscription(options: RealtimeOptions) {
       channelFilter = `${filter.column}=eq.${filter.value}`;
     }
 
-    // Crear nuevo canal
+    // Crear nuevo canal con manejo de errores
     const channel = supabase
-      .channel(channelKey)
+      .channel(channelKey, {
+        config: {
+          broadcast: { self: false },
+          presence: { key: '' },
+        },
+      })
       .on(
         'postgres_changes' as any,
         {
@@ -51,8 +70,14 @@ export function useRealtimeSubscription(options: RealtimeOptions) {
           onChange(payload);
         }
       )
-      .subscribe((status) => {
-        console.log(`[Realtime] Canal ${channelKey} estado:`, status);
+      .subscribe((status, error) => {
+        // Solo loguear estados importantes para reducir ruido
+        if (status === 'SUBSCRIBED') {
+          console.log(`[Realtime] ✅ Conectado a ${channelKey}`);
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn(`[Realtime] ⚠️ Error en ${channelKey}:`, error);
+          // Opcional: Notificar al usuario de problemas de conexión
+        }
       });
 
     channelRef.current = channel;
