@@ -568,7 +568,7 @@ export function HomePage() {
                     <p className="text-white font-semibold text-lg">Nuestra Tienda</p>
                     <p className="text-gray-400 text-sm mt-2">
                       741 Cra. 17, Cartagena de Indias<br />
-                      Barrio El Laguito, cerca del Hotel Caribe
+                      Barrio San Francisco, cerca de la Urbanización Portal del Virrey
                     </p>
                     <a
                       href="https://www.google.com/maps/search/?api=1&query=10.43711374619797,-75.51578191333984"
@@ -608,7 +608,7 @@ export function HomePage() {
                     <h4 className="text-white font-semibold text-lg mb-1">Dirección</h4>
                     <p className="text-gray-400">
                       741 Cra. 17, Cartagena de Indias, Bolívar<br />
-                      <span className="text-gray-500 text-sm">Barrio El Laguito, cerca del Hotel Caribe</span>
+                      <span className="text-gray-500 text-sm">Barrio San Francisco, cerca de la Urbanización Portal del Virrey</span>
                     </p>
                   </div>
                 </motion.div>
