@@ -72,9 +72,14 @@ export interface GetMessagesResponse {
  * Get all conversations for the current user
  */
 export const getConversations = async (page = 1, limit = 20): Promise<GetConversationsResponse> => {
-  const response = await api.get('/messages/conversations', {
-    params: { page, limit },
-  });
+  const params: Record<string, string> = {
+    page: String(page),
+    limit: String(limit),
+  };
+  const response = await api.get<GetConversationsResponse>('/messages/conversations', params);
+  if (!response || !response.data) {
+    throw new Error('Invalid response from server');
+  }
   return response.data;
 };
 
@@ -86,9 +91,14 @@ export const getMessages = async (
   page = 1,
   limit = 50
 ): Promise<GetMessagesResponse> => {
-  const response = await api.get(`/messages/conversations/${conversationId}/messages`, {
-    params: { page, limit },
-  });
+  const params: Record<string, string> = {
+    page: String(page),
+    limit: String(limit),
+  };
+  const response = await api.get<GetMessagesResponse>(`/messages/conversations/${conversationId}/messages`, params);
+  if (!response || !response.data) {
+    throw new Error('Invalid response from server');
+  }
   return response.data;
 };
 

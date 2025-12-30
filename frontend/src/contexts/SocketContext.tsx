@@ -10,11 +10,11 @@ interface SocketContextType {
   leaveConversation: (conversationId: string) => void;
   sendMessage: (conversationId: string, content: string) => void;
   sendTyping: (conversationId: string, isTyping: boolean) => void;
-  onNewMessage: (callback: (message: Message) => void) => void;
-  onMessageEdited: (callback: (message: Message) => void) => void;
-  onMessageDeleted: (callback: (data: { messageId: string; conversationId: string }) => void) => void;
-  onUserTyping: (callback: (data: { userId: string; isTyping: boolean }) => void) => void;
-  onMessageNotification: (callback: (data: { conversationId: string; message: Message }) => void) => void;
+  onNewMessage: (callback: (message: Message) => void) => () => void;
+  onMessageEdited: (callback: (message: Message) => void) => () => void;
+  onMessageDeleted: (callback: (data: { messageId: string; conversationId: string }) => void) => () => void;
+  onUserTyping: (callback: (data: { userId: string; isTyping: boolean }) => void) => () => void;
+  onMessageNotification: (callback: (data: { conversationId: string; message: Message }) => void) => () => void;
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -24,11 +24,11 @@ const SocketContext = createContext<SocketContextType>({
   leaveConversation: () => {},
   sendMessage: () => {},
   sendTyping: () => {},
-  onNewMessage: () => {},
-  onMessageEdited: () => {},
-  onMessageDeleted: () => {},
-  onUserTyping: () => {},
-  onMessageNotification: () => {},
+  onNewMessage: () => () => {},
+  onMessageEdited: () => () => {},
+  onMessageDeleted: () => () => {},
+  onUserTyping: () => () => {},
+  onMessageNotification: () => () => {},
 });
 
 export const useSocket = () => {

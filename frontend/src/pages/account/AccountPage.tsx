@@ -15,12 +15,24 @@ import {
   CreditCard,
   TrendingUp,
   Crown,
-  Code
+  Code,
+  Tag,
+  Sparkles,
+  Gift,
+  Percent,
+  ShoppingBag,
+  ArrowRight,
+  Clock,
+  Star
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/authStore';
-import { userService, orderService } from '@/lib/services';
-import type { Order, Address, TeamMember } from '@/types';
-import { formatCurrency } from '@/lib/utils';
+import { userService, orderService, productService, couponService } from '@/lib/services';
+import type { Order, Address, TeamMember, Product } from '@/types';
+import { formatCurrency, calculateDiscount } from '@/lib/utils';
+import { ProductCard } from '@/components/ui/ProductCard';
+import { Button, IconButton } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 export function AccountPage() {
   const { user, profile, signOut, fetchProfile } = useAuthStore();
@@ -28,7 +40,10 @@ export function AccountPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [teamMember, setTeamMember] = useState<TeamMember | null>(null);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [activeCoupons, setActiveCoupons] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [promoBanner, setPromoBanner] = useState<any>(null);
 
   useEffect(() => {
     loadData();
@@ -39,15 +54,50 @@ export function AccountPage() {
     setIsLoading(true);
     try {
       await fetchProfile();
-      const [ordersData, profileData] = await Promise.all([
+      const [ordersData, profileData, productsData, couponsData] = await Promise.all([
         orderService.getByUser(user.id).catch(() => []),
-        userService.getProfile(user.id).catch(() => null)
+        userService.getProfile(user.id).catch(() => null),
+        productService.getFeatured().catch(() => []),
+        couponService.getAll({ status: 'active' }).catch(() => ({ data: { coupons: [] } }))
       ]);
-      setOrders(ordersData.slice(0, 3)); // Last 3 orders
+      setOrders(ordersData.slice(0, 3));
       if (profileData) {
         setAddresses(profileData.addresses || []);
         setTeamMember(profileData.team_member || null);
       }
+      setFeaturedProducts(productsData.slice(0, 4));
+      setActiveCoupons(couponsData.data?.coupons?.slice(0, 3) || []);
+
+      // Promotional banner simulation
+      const today = new Date();
+      const hour = today.getHours();
+      let promo = null;
+      if (hour >= 6 && hour < 12) {
+        promo = {
+          type: 'morning',
+          title: 'Buenos Días!',
+          subtitle: '20% OFF en toda la colección urbana',
+          code: 'MANANA20',
+          color: 'from-amber-500 to-orange-500'
+        };
+      } else if (hour >= 12 && hour < 18) {
+        promo = {
+          type: 'afternoon',
+          title: 'Tarde de Estilo',
+          subtitle: 'Envío gratis en pedidos +$100.000',
+          code: 'TARDEGRATIS',
+          color: 'from-blue-500 to-indigo-500'
+        };
+      } else {
+        promo = {
+          type: 'night',
+          title: 'Oferta Nocturna',
+          subtitle: '3x2 en selected items',
+          code: 'NOCHE3X2',
+          color: 'from-purple-500 to-pink-500'
+        };
+      }
+      setPromoBanner(promo);
     } catch (error) {
       console.error('Error loading account data:', error);
     } finally {
@@ -74,11 +124,50 @@ export function AccountPage() {
 
   return (
     <div className="min-h-screen bg-black text-white py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
+        {/* Promo Banner */}
+        <AnimatePresence>
+          {promoBanner && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className={cn(
+                'mb-6 rounded-2xl p-6 bg-gradient-to-r text-white overflow-hidden relative',
+                promoBanner.color
+              )}
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+              <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className="w-5 h-5" />
+                    <span className="text-sm font-medium opacity-90">Oferta Especial</span>
+                  </div>
+                  <h2 className="text-2xl font-bold mb-1">{promoBanner.title}</h2>
+                  <p className="opacity-90">{promoBanner.subtitle}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/20 backdrop-blur rounded-xl px-4 py-2 font-mono">
+                    <span className="text-sm opacity-75">Código:</span>
+                    <span className="font-bold ml-2">{promoBanner.code}</span>
+                  </div>
+                  <Link
+                    to="/shop"
+                    className="bg-white text-black px-4 py-2 rounded-xl font-medium hover:bg-gray-100 transition-colors flex items-center gap-2"
+                  >
+                    Ver Oferta <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Header con avatar y info básica */}
         <div className="bg-gradient-to-r from-zinc-900 to-zinc-800 rounded-2xl p-6 mb-6">
           <div className="flex flex-col md:flex-row items-center gap-6">
-            {/* Avatar */}
             <div className="relative group">
               <div className="w-28 h-28 rounded-full bg-zinc-700 overflow-hidden ring-4 ring-white/20">
                 {profile?.avatar_url ? (
@@ -101,7 +190,6 @@ export function AccountPage() {
               </Link>
             </div>
 
-            {/* Info */}
             <div className="flex-1 text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
                 <h1 className="text-2xl font-bold">{profile?.full_name}</h1>
@@ -140,7 +228,6 @@ export function AccountPage() {
               </div>
             </div>
 
-            {/* Quick actions */}
             <div className="flex gap-2">
               <Link
                 to="/account/edit"
@@ -151,6 +238,50 @@ export function AccountPage() {
             </div>
           </div>
         </div>
+
+        {/* Cupones Activos del Cliente */}
+        {activeCoupons.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <div className="bg-gradient-to-r from-emerald-900/50 to-teal-900/50 rounded-2xl p-5 border border-emerald-500/30">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-emerald-400" />
+                  <h3 className="font-semibold text-emerald-400">Tus Cupones Disponibles</h3>
+                </div>
+                <Link to="/shop" className="text-sm text-emerald-400 hover:text-emerald-300 flex items-center gap-1">
+                  Ver todos <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {activeCoupons.map((coupon) => (
+                  <div
+                    key={coupon.id}
+                    className="bg-black/30 rounded-xl p-4 border border-emerald-500/20 flex items-center justify-between"
+                  >
+                    <div>
+                      <p className="font-bold text-white font-mono">{coupon.code}</p>
+                      <p className="text-xs text-emerald-400">
+                        {coupon.discount_type === 'percentage'
+                          ? `${coupon.discount_value}% OFF`
+                          : formatCurrency(coupon.discount_value) + ' OFF'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(coupon.code)}
+                      className="p-2 bg-emerald-500/20 rounded-lg hover:bg-emerald-500/30 transition-colors"
+                    >
+                      <Tag className="w-4 h-4 text-emerald-400" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Stats rápidos */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -175,8 +306,113 @@ export function AccountPage() {
         <div className="grid md:grid-cols-3 gap-6">
           {/* Menu principal */}
           <div className="md:col-span-2 space-y-4">
+            {/* Productos Destacados */}
+            {featuredProducts.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-zinc-900 rounded-xl overflow-hidden"
+              >
+                <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+                  <h2 className="font-semibold flex items-center gap-2">
+                    <Star className="w-5 h-5 text-yellow-500" /> Productos Destacados
+                  </h2>
+                  <Link to="/shop" className="text-sm text-white hover:text-zinc-300 flex items-center gap-1">
+                    Ver tienda <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+                <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {featuredProducts.map((product) => (
+                    <Link
+                      key={product.id}
+                      to={`/product/${product.slug}`}
+                      className="group block"
+                    >
+                      <div className="aspect-[3/4] rounded-lg overflow-hidden bg-zinc-800 mb-2">
+                        <img
+                          src={product.images?.[0]?.url || 'https://via.placeholder.com/300x400'}
+                          alt={product.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        {product.compare_at_price && (
+                          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                            -{calculateDiscount(product.compare_at_price, product.price)}%
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm font-medium truncate">{product.name}</p>
+                      <p className="text-sm text-zinc-400">{formatCurrency(product.price)}</p>
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Promociones Activas */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-xl overflow-hidden border border-purple-500/30"
+            >
+              <div className="p-4 border-b border-purple-500/30 flex items-center justify-between">
+                <h2 className="font-semibold flex items-center gap-2 text-purple-300">
+                  <Percent className="w-5 h-5" /> Promociones Vigentes
+                </h2>
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="flex items-center justify-between bg-black/20 rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                      <ShoppingBag className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Compra 1 y Lleva 2</p>
+                      <p className="text-xs text-purple-300">En selected items de la temporada</p>
+                    </div>
+                  </div>
+                  <Link to="/shop?promo=3x2" className="px-3 py-1 bg-purple-500 text-white text-sm rounded-lg hover:bg-purple-600 transition-colors">
+                    Ver
+                  </Link>
+                </div>
+                <div className="flex items-center justify-between bg-black/20 rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center">
+                      <Gift className="w-5 h-5 text-pink-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Envío Gratis</p>
+                      <p className="text-xs text-purple-300">En pedidos mayores a $100.000</p>
+                    </div>
+                  </div>
+                  <Link to="/shop" className="px-3 py-1 bg-pink-500 text-white text-sm rounded-lg hover:bg-pink-600 transition-colors">
+                    Ver
+                  </Link>
+                </div>
+                <div className="flex items-center justify-between bg-black/20 rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Flash Sale - 24h</p>
+                      <p className="text-xs text-purple-300">Hasta 50% OFF en categorías seleccionadas</p>
+                    </div>
+                  </div>
+                  <Link to="/shop?promo=flash" className="px-3 py-1 bg-amber-500 text-black text-sm rounded-lg hover:bg-amber-600 transition-colors">
+                    Ver
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+
             {/* Últimos pedidos */}
-            <div className="bg-zinc-900 rounded-xl overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-zinc-900 rounded-xl overflow-hidden"
+            >
               <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
                 <h2 className="font-semibold flex items-center gap-2">
                   <Package className="w-5 h-5 text-zinc-400" /> Mis Pedidos
@@ -226,7 +462,7 @@ export function AccountPage() {
                   </Link>
                 </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Direcciones guardadas */}
             <div className="bg-zinc-900 rounded-xl overflow-hidden">
@@ -358,7 +594,6 @@ export function AccountPage() {
                   </h3>
                 </div>
                 <nav className="divide-y divide-zinc-700">
-                  {/* Admin Panel - available to all admin level users */}
                   {(isOwner || isAdmin) && (
                     <Link
                       to="/admin"

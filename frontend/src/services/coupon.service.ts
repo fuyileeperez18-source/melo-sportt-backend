@@ -54,11 +54,33 @@ export interface ValidateCouponResponse {
   message: string;
 }
 
+interface GetCouponsResponse {
+  success: boolean;
+  data: {
+    coupons: Coupon[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalCount: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  };
+}
+
 class CouponService {
   private baseUrl = '/coupons';
 
-  async getAll(params?: { page?: number; limit?: number; status?: string }) {
-    const response = await apiClient.get(this.baseUrl, { params });
+  async getAll(params?: { page?: number; limit?: number; status?: string }): Promise<GetCouponsResponse> {
+    const queryParams: Record<string, string> = {};
+    if (params?.page) queryParams.page = String(params.page);
+    if (params?.limit) queryParams.limit = String(params.limit);
+    if (params?.status) queryParams.status = params.status;
+
+    const response = await apiClient.get<GetCouponsResponse>(this.baseUrl, queryParams);
+    if (!response || !response.data) {
+      throw new Error('Invalid response from server');
+    }
     return response.data;
   }
 
@@ -84,7 +106,7 @@ class CouponService {
 
   async validate(data: ValidateCouponData): Promise<ValidateCouponResponse> {
     const response = await apiClient.post(`${this.baseUrl}/validate`, data);
-    return response.data;
+    return response.data as ValidateCouponResponse;
   }
 
   async incrementUsage(couponId: string) {

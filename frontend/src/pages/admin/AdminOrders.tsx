@@ -15,6 +15,8 @@ import {
   RefreshCw,
   MessageSquare,
   Mail,
+  Filter,
+  X,
 } from 'lucide-react';
 
 import { Button, IconButton } from '@/components/ui/Button';
@@ -44,12 +46,15 @@ const paymentConfig = {
 export function AdminOrders() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [contactMessage, setContactMessage] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadOrders();
@@ -76,6 +81,12 @@ export function AdminOrders() {
     return matchesSearch && matchesStatus;
   });
 
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const openOrderDetail = (order: Order) => {
     setSelectedOrder(order);
     setIsDetailOpen(true);
@@ -86,7 +97,6 @@ export function AdminOrders() {
   };
 
   const sendContactMessage = () => {
-    // Aquí implementarías el envío del mensaje
     toast.success('Mensaje enviado al cliente');
     setContactMessage('');
     setIsContactModalOpen(false);
@@ -113,187 +123,214 @@ export function AdminOrders() {
         </Button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col lg:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar pedidos..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-11 pl-10 pr-4 bg-white border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-black transition-colors"
-          />
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={cn(
-                'px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize',
-                statusFilter === status
-                  ? 'bg-black text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:border-black'
-              )}
-            >
-              {status === 'all' ? 'Todos' : statusConfig[status as keyof typeof statusConfig]?.label || status}
-            </button>
-          ))}
-        </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {['all', 'pending', 'confirmed', 'shipped', 'delivered'].map((status) => (
+          <button
+            key={status}
+            onClick={() => setStatusFilter(status)}
+            className={cn(
+              'p-4 rounded-xl border transition-all text-left',
+              statusFilter === status
+                ? 'bg-black text-white border-black'
+                : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+            )}
+          >
+            <p className={cn(
+              'text-2xl font-bold',
+              statusFilter === status ? 'text-white' : 'text-black'
+            )}>
+              {status === 'all'
+                ? orders.length
+                : orders.filter(o => o.status === status).length}
+            </p>
+            <p className={cn(
+              'text-sm',
+              statusFilter === status ? 'text-gray-300' : 'text-gray-500'
+            )}>
+              {status === 'all' ? 'Total' : statusConfig[status as keyof typeof statusConfig]?.label || status}
+            </p>
+          </button>
+        ))}
       </div>
 
-      {/* Table - Desktop */}
-      <div className="hidden lg:block bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px]">
-            <thead className="bg-gray-50">
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-4 px-4 text-sm font-semibold text-black whitespace-nowrap">Pedido</th>
-                <th className="text-left py-4 px-4 text-sm font-semibold text-black whitespace-nowrap">Cliente</th>
-                <th className="text-left py-4 px-4 text-sm font-semibold text-black whitespace-nowrap">Total</th>
-                <th className="text-left py-4 px-4 text-sm font-semibold text-black whitespace-nowrap">Estado</th>
-                <th className="text-left py-4 px-4 text-sm font-semibold text-black whitespace-nowrap">Pago</th>
-                <th className="text-left py-4 px-4 text-sm font-semibold text-black whitespace-nowrap">Fecha</th>
-                <th className="text-right py-4 px-4 text-sm font-semibold text-black whitespace-nowrap">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.length > 0 ? (
-                filteredOrders.map((order) => {
-                  const StatusIcon = statusConfig[order.status as keyof typeof statusConfig]?.icon || Clock;
-                  return (
-                    <motion.tr
-                      key={order.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+      {/* Filters Bar */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar por número de pedido..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-11 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-colors"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant={showFilters ? 'default' : 'outline'}
+              onClick={() => setShowFilters(!showFilters)}
+              leftIcon={<Filter className="h-4 w-4" />}
+            >
+              Filtros
+            </Button>
+            <IconButton onClick={loadOrders} disabled={isLoading}>
+              <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+            </IconButton>
+          </div>
+        </div>
+
+        {/* Advanced Filters */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-4 mt-4 border-t border-gray-200">
+                <div className="flex flex-wrap gap-2">
+                  {['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => {
+                        setStatusFilter(status);
+                        setCurrentPage(1);
+                      }}
+                      className={cn(
+                        'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize',
+                        statusFilter === status
+                          ? 'bg-black text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      )}
                     >
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <span className="text-black font-medium text-sm">#{order.order_number}</span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2 min-w-[150px]">
-                          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-black text-xs font-medium flex-shrink-0">
-                            {order.user_id?.charAt(0).toUpperCase() || 'U'}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-black font-medium text-sm truncate">{order.user_id}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-black font-medium text-sm whitespace-nowrap">{formatCurrency(order.total)}</td>
-                      <td className="py-3 px-4 whitespace-nowrap">
+                      {status === 'all' ? 'Todos' : statusConfig[status as keyof typeof statusConfig]?.label || status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Results Count */}
+      <div className="flex items-center justify-between text-sm text-gray-600">
+        <p>{filteredOrders.length} pedido{filteredOrders.length !== 1 ? 's' : ''} encontrado{filteredOrders.length !== 1 ? 's' : ''}</p>
+        {searchQuery && (
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setStatusFilter('all');
+            }}
+            className="text-black hover:underline flex items-center gap-1"
+          >
+            <X className="h-4 w-4" /> Limpiar filtros
+          </button>
+        )}
+      </div>
+
+      {/* Orders List - Compact Cards instead of large table */}
+      <div className="space-y-3">
+        {paginatedOrders.length > 0 ? (
+          paginatedOrders.map((order) => {
+            const StatusIcon = statusConfig[order.status as keyof typeof statusConfig]?.icon || Clock;
+            return (
+              <motion.div
+                key={order.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => openOrderDetail(order)}
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Package className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-black">#{order.order_number}</span>
                         <span className={cn(
-                          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium',
+                          'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
                           statusConfig[order.status as keyof typeof statusConfig]?.color || 'bg-gray-100 text-gray-800'
                         )}>
                           <StatusIcon className="h-3 w-3" />
                           {statusConfig[order.status as keyof typeof statusConfig]?.label || order.status}
                         </span>
-                      </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <span className={cn(
-                          'text-xs font-medium',
-                          paymentConfig[order.payment_status as keyof typeof paymentConfig]?.color || 'text-gray-600'
-                        )}>
-                          {paymentConfig[order.payment_status as keyof typeof paymentConfig]?.label || order.payment_status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-gray-600 text-xs whitespace-nowrap">
-                        {formatDate(order.created_at, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1">
-                          <IconButton onClick={() => openOrderDetail(order)}>
-                            <Eye className="h-4 w-4" />
-                          </IconButton>
-                          <IconButton>
-                            <MoreVertical className="h-4 w-4" />
-                          </IconButton>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center">
-                    <Package className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-600">No hay pedidos disponibles</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Cards - Mobile */}
-      <div className="lg:hidden space-y-4">
-        {filteredOrders.length > 0 ? (
-          filteredOrders.map((order) => {
-            const StatusIcon = statusConfig[order.status as keyof typeof statusConfig]?.icon || Clock;
-            return (
-              <motion.div
-                key={order.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-black font-semibold">#{order.order_number}</p>
-                    <p className="text-gray-600 text-sm">{order.user_id}</p>
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        {order.user_id?.slice(0, 8)}... • {formatDate(order.created_at)}
+                      </p>
+                    </div>
                   </div>
-                  <span className={cn(
-                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium',
-                    statusConfig[order.status as keyof typeof statusConfig]?.color || 'bg-gray-100 text-gray-800'
-                  )}>
-                    <StatusIcon className="h-3 w-3" />
-                    {statusConfig[order.status as keyof typeof statusConfig]?.label || order.status}
-                  </span>
-                </div>
-                <div className="space-y-2 mb-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Total:</span>
-                    <span className="text-black font-semibold">{formatCurrency(order.total)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Pago:</span>
-                    <span className={cn(
-                      'font-medium',
-                      paymentConfig[order.payment_status as keyof typeof paymentConfig]?.color || 'text-gray-600'
-                    )}>
-                      {paymentConfig[order.payment_status as keyof typeof paymentConfig]?.label || order.payment_status}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Fecha:</span>
-                    <span className="text-gray-800">
-                      {formatDate(order.created_at, { month: 'short', day: 'numeric' })}
-                    </span>
+                  <div className="flex items-center gap-4 md:gap-6">
+                    <div className="text-right">
+                      <p className="font-bold text-black">{formatCurrency(order.total)}</p>
+                      <span className={cn(
+                        'text-xs font-medium',
+                        paymentConfig[order.payment_status as keyof typeof paymentConfig]?.color || 'text-gray-600'
+                      )}>
+                        {paymentConfig[order.payment_status as keyof typeof paymentConfig]?.label || order.payment_status}
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openOrderDetail(order);
+                      }}
+                    >
+                      Ver detalles
+                    </Button>
                   </div>
                 </div>
-                <Button
-                  onClick={() => openOrderDetail(order)}
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  leftIcon={<Eye className="h-4 w-4" />}
-                >
-                  Ver Detalles
-                </Button>
               </motion.div>
             );
           })
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-            <Package className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-600">No hay pedidos disponibles</p>
+          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm">
+            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-black mb-2">No hay pedidos</h3>
+            <p className="text-gray-600">No se encontraron pedidos con los filtros actuales</p>
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-sm text-gray-600">
+            Página {currentPage} de {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              leftIcon={<ChevronLeft className="h-4 w-4" />}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              rightIcon={<ChevronRight className="h-4 w-4" />}
+            >
+              Siguiente
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Order Detail Modal */}
       <Modal
