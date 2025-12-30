@@ -66,7 +66,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     }
 
     // Create socket connection
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    // Note: Socket.IO is mounted at root level, not under /api
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const backendUrl = apiUrl.replace(/\/api\/?$/, ''); // Remove /api suffix if present
 
     console.log('Connecting to WebSocket:', backendUrl);
 

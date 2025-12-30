@@ -34,6 +34,19 @@ const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().default('dpqtlalhr'),
   CLOUDINARY_API_KEY: z.string().default('349642127979112'),
   CLOUDINARY_API_SECRET: z.string().default('IlRgm45gSTCRU_kocNVlFG_v_bg'),
+
+  // WhatsApp Business API
+  WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
+  WHATSAPP_ACCESS_TOKEN: z.string().optional(),
+  WHATSAPP_WEBHOOK_TOKEN: z.string().optional(),
+  FUYI_PHONE_NUMBER: z.string().default('573238020198'),
+  STORE_OWNER_PHONE: z.string().optional(),
+
+  // Comisión de intermediario (porcentaje)
+  INTERMEDIARY_COMMISSION_PERCENTAGE: z.string().default('12'),
+
+  // Categorías de productos para el bot
+  WHATSAPP_BOT_CATEGORIES: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

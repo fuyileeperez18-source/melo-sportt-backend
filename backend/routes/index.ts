@@ -10,6 +10,7 @@ import uploadRoutes from './upload.routes.js';
 import commissionRoutes from './commission.routes.js';
 import messagesRoutes from './messages.routes.js';
 import couponsRoutes from './coupons.routes.js';
+import whatsappRoutes from './whatsapp.routes.js';
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use('/upload', uploadRoutes);
 router.use('/commissions', commissionRoutes);
 router.use('/messages', messagesRoutes);
 router.use('/coupons', couponsRoutes);
+router.use('/whatsapp', whatsappRoutes);
 
 export default router;

@@ -543,18 +543,43 @@ export function HomePage() {
                 whileHover={{ scale: 1.01 }}
                 className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-primary-800"
               >
-                {/* Street View iframe */}
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!4v1767125254299!6m8!1m7!1s1XMT5bRvBnHCpslJ_lwVWw!2m2!1d10.43711374619797!2d-75.51578191333984!3f177.19962735201298!4f-0.36276961538061414!5f0.7820865974627469"
-                  width="100%"
-                  height="450"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Street View - Melo Sportt"
-                  className="w-full"
-                />
+                {/* Street View iframe with fallback */}
+                <div className="relative w-full h-[450px] bg-primary-900">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!4v1767125254299!6m8!1m7!1s1XMT5bRvBnHCpslJ_lwVWw!2m2!1d10.43711374619797!2d-75.51578191333984!3f177.19962735201298!4f-0.36276961538061414!5f0.7820865974627469"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0, position: 'absolute', inset: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Street View - Melo Sportt"
+                    onError={(e) => {
+                      // Fallback to static image if embed fails
+                      const target = e.target as HTMLIFrameElement;
+                      target.style.display = 'none';
+                      const fallback = target.parentElement?.querySelector('.map-fallback') as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                  {/* Fallback placeholder when embed fails */}
+                  <div className="map-fallback hidden absolute inset-0 bg-gradient-to-br from-primary-800 to-primary-900 flex-col items-center justify-center text-center p-6">
+                    <MapPin className="h-12 w-12 text-white/50 mb-4" />
+                    <p className="text-white font-semibold text-lg">Nuestra Tienda</p>
+                    <p className="text-gray-400 text-sm mt-2">
+                      741 Cra. 17, Cartagena de Indias<br />
+                      Barrio El Laguito, cerca del Hotel Caribe
+                    </p>
+                    <a
+                      href="https://www.google.com/maps/search/?api=1&query=10.43711374619797,-75.51578191333984"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+                    >
+                      Ver en Google Maps
+                    </a>
+                  </div>
+                </div>
               </motion.div>
             </AnimatedSection>
 
