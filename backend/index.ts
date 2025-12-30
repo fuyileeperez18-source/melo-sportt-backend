@@ -25,12 +25,15 @@ const allowedOrigins = env.ALLOWED_ORIGINS
   ? env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
   : [env.FRONTEND_URL];
 
+// Add Vercel preview deployments automatically
+const vercelPreviewPattern = /^https:\/\/melo-sportt(-git-[a-z0-9-]+)?\.vercel\.app$/;
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, etc)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes(origin) || vercelPreviewPattern.test(origin)) {
       callback(null, true);
     } else {
       console.log(`CORS blocked origin: ${origin}`);
@@ -124,8 +127,10 @@ async function runAutoMigrations() {
         // Si es error de tabla ya existe, continuar
         if (error.message.includes('already exists') ||
             error.message.includes('ya existe') ||
-            error.message.includes('duplicate key')) {
-          console.log(`⚠️  ${migrationName} ya aplicada (error ignorado)`);
+            error.message.includes('duplicate key') ||
+            error.message.includes('does not exist') ||
+            error.message.includes('column')) {
+          console.log(`⚠️  ${migrationName} ya aplicada o parte de ella (error ignorado: ${error.message.substring(0, 50)}...)`);
         } else {
           console.error(`❌ Error en ${migrationName}:`, error.message);
           // No fallar completamente, continuar con otras migraciones

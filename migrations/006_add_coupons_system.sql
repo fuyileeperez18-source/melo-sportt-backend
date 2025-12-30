@@ -1,7 +1,7 @@
 -- Migration: Add Coupons System
 -- Description: Create table for discount coupons
 
--- Create coupons table
+-- Create coupons table if not exists
 CREATE TABLE IF NOT EXISTS coupons (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code VARCHAR(50) NOT NULL UNIQUE,
@@ -20,10 +20,43 @@ CREATE TABLE IF NOT EXISTS coupons (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create index for faster lookups
-CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(UPPER(code));
-CREATE INDEX IF NOT EXISTS idx_coupons_active ON coupons(active);
-CREATE INDEX IF NOT EXISTS idx_coupons_expires_at ON coupons(expires_at);
+-- Add missing columns if they don't exist
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                 WHERE table_name = 'coupons' AND column_name = 'active') THEN
+    ALTER TABLE coupons ADD COLUMN active BOOLEAN DEFAULT true;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                 WHERE table_name = 'coupons' AND column_name = 'applicable_to') THEN
+    ALTER TABLE coupons ADD COLUMN applicable_to VARCHAR(20) DEFAULT 'all';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                 WHERE table_name = 'coupons' AND column_name = 'product_ids') THEN
+    ALTER TABLE coupons ADD COLUMN product_ids JSONB;
+  END IF;
+END $$;
+
+-- Create indexes for faster lookups (handle case where column might not exist)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+             WHERE table_name = 'coupons' AND column_name = 'code') THEN
+    CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(UPPER(code));
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+             WHERE table_name = 'coupons' AND column_name = 'active') THEN
+    CREATE INDEX IF NOT EXISTS idx_coupons_active ON coupons(active);
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+             WHERE table_name = 'coupons' AND column_name = 'expires_at') THEN
+    CREATE INDEX IF NOT EXISTS idx_coupons_expires_at ON coupons(expires_at);
+  END IF;
+END $$;
 
 -- Add coupon_code and coupon_discount to orders table if not exists
 DO $$
