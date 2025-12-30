@@ -79,7 +79,36 @@ class CouponService {
 
     const response = await apiClient.get<GetCouponsResponse>(this.baseUrl, queryParams);
     if (!response || !response.data) {
-      throw new Error('Invalid response from server');
+      // Return empty structure instead of throwing
+      return {
+        success: true,
+        data: {
+          coupons: [],
+          pagination: {
+            currentPage: 1,
+            totalPages: 0,
+            totalCount: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
+          },
+        },
+      };
+    }
+    // Ensure coupons array exists
+    if (!response.data.data) {
+      response.data.data = {
+        coupons: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 0,
+          totalCount: 0,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      };
+    }
+    if (!response.data.data.coupons) {
+      response.data.data.coupons = [];
     }
     return response.data;
   }

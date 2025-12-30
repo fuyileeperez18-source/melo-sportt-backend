@@ -18,7 +18,7 @@ const variants = {
     'bg-primary-800 text-white hover:bg-primary-700 active:bg-primary-600 border border-primary-700',
   outline:
     'bg-transparent text-white border-2 border-white hover:bg-white hover:text-black',
-  ghost: 'bg-transparent text-white hover:bg-white/10',
+  ghost: 'bg-transparent text-black hover:bg-gray-100',
   link: 'bg-transparent text-white underline-offset-4 hover:underline',
 };
 

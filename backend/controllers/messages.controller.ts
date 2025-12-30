@@ -22,14 +22,14 @@ export const getConversations = async (req: Request, res: Response) => {
 
     if (userRole !== 'admin' && userRole !== 'super_admin') {
       // Customer only sees their conversations
-      whereClause = 'WHERE c.customer_id = $3';
+      whereClause = 'WHERE c.user_id = $3';
       queryParams.push(userId);
     }
 
     const conversationsResult = await pool.query(
       `SELECT
         c.id,
-        c.customer_id,
+        c.user_id as customer_id,
         c.order_id,
         c.product_id,
         c.status,
@@ -49,7 +49,7 @@ export const getConversations = async (req: Request, res: Response) => {
          AND m.is_read = false) as unread_count,
         (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.id) as total_messages
       FROM conversations c
-      INNER JOIN users u ON c.customer_id = u.id
+      INNER JOIN users u ON c.user_id = u.id
       LEFT JOIN products p ON c.product_id = p.id
       LEFT JOIN orders o ON c.order_id = o.id
       ${whereClause}
@@ -140,7 +140,7 @@ export const getMessages = async (req: Request, res: Response) => {
 
     // Verify conversation access
     const convResult = await pool.query(
-      `SELECT customer_id FROM conversations WHERE id = $1`,
+      `SELECT user_id FROM conversations WHERE id = $1`,
       [conversationId]
     );
 
@@ -155,7 +155,7 @@ export const getMessages = async (req: Request, res: Response) => {
 
     // Check if user has access
     if (
-      conversation.customer_id !== userId &&
+      conversation.user_id !== userId &&
       userRole !== 'admin' &&
       userRole !== 'super_admin'
     ) {
@@ -262,7 +262,7 @@ export const sendMessage = async (req: Request, res: Response) => {
 
     // Verify conversation access
     const convResult = await pool.query(
-      `SELECT customer_id FROM conversations WHERE id = $1`,
+      `SELECT user_id FROM conversations WHERE id = $1`,
       [conversationId]
     );
 
@@ -277,7 +277,7 @@ export const sendMessage = async (req: Request, res: Response) => {
 
     // Check if user has access
     if (
-      conversation.customer_id !== userId &&
+      conversation.user_id !== userId &&
       userRole !== 'admin' &&
       userRole !== 'super_admin'
     ) {
@@ -325,7 +325,7 @@ export const sendMessage = async (req: Request, res: Response) => {
 
     // Send notification to other party
     if (userRole === 'admin' || userRole === 'super_admin') {
-      sendNotificationToUser(conversation.customer_id, {
+      sendNotificationToUser(conversation.user_id, {
         type: 'message-notification',
         conversationId,
         message: messageWithSender,
@@ -366,13 +366,13 @@ export const createOrGetConversation = async (req: Request, res: Response) => {
     let existingConv;
     if (orderId) {
       const result = await pool.query(
-        `SELECT * FROM conversations WHERE customer_id = $1 AND order_id = $2 AND status = 'active'`,
+        `SELECT * FROM conversations WHERE user_id = $1 AND order_id = $2 AND status = 'active'`,
         [userId, orderId]
       );
       existingConv = result.rows[0];
     } else if (productId) {
       const result = await pool.query(
-        `SELECT * FROM conversations WHERE customer_id = $1 AND product_id = $2 AND status = 'active'`,
+        `SELECT * FROM conversations WHERE user_id = $1 AND product_id = $2 AND status = 'active'`,
         [userId, productId]
       );
       existingConv = result.rows[0];
@@ -391,7 +391,7 @@ export const createOrGetConversation = async (req: Request, res: Response) => {
 
     // Create new conversation
     const convResult = await pool.query(
-      `INSERT INTO conversations (customer_id, product_id, order_id, status, created_at)
+      `INSERT INTO conversations (user_id, product_id, order_id, status, created_at)
        VALUES ($1, $2, $3, 'active', NOW())
        RETURNING *`,
       [userId, productId || null, orderId || null]
@@ -478,7 +478,7 @@ export const getUnreadCount = async (req: Request, res: Response) => {
       result = await pool.query(
         `SELECT COUNT(*) FROM messages m
          INNER JOIN conversations c ON m.conversation_id = c.id
-         WHERE c.customer_id = $1 AND m.sender_id != $1 AND m.is_read = false`,
+         WHERE c.user_id = $1 AND m.sender_id != $1 AND m.is_read = false`,
         [userId]
       );
     }
@@ -520,7 +520,7 @@ export const editMessage = async (req: Request, res: Response) => {
 
     // Get message
     const messageResult = await pool.query(
-      `SELECT m.*, c.customer_id
+      `SELECT m.*, c.user_id
        FROM messages m
        INNER JOIN conversations c ON m.conversation_id = c.id
        WHERE m.id = $1`,
@@ -616,7 +616,7 @@ export const deleteMessage = async (req: Request, res: Response) => {
 
     // Get message
     const messageResult = await pool.query(
-      `SELECT m.*, c.customer_id
+      `SELECT m.*, c.user_id
        FROM messages m
        INNER JOIN conversations c ON m.conversation_id = c.id
        WHERE m.id = $1`,
